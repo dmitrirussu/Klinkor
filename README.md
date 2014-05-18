@@ -14,9 +14,9 @@ What is AppLauncher?
 3. Config
 -----------
 - Actions Config
+----
 
-app/DemoApp/Config/actions.ini
----------------------------------
+	app/DemoApp/Config/actions.ini
 
 	[en:home-one]
 	action=DemoApp::DefaultController->defaultAction
@@ -25,9 +25,9 @@ app/DemoApp/Config/actions.ini
 
 
 - DataBase Configuration
+----
 
-config/databases.ini
-------------------------
+	config/databases.ini
 
 	[default]
     driver = pdo_mysql;
