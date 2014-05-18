@@ -1,2 +1,2 @@
-AppLauncher
-===========
+AppLauncher, Web Framework
+====
