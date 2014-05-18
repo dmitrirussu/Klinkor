@@ -11,7 +11,7 @@ What is AppLauncher?
 - App Console Generator
 - ORM DataBase Entities Console Generator
 
-3. Config
+3. Configs
 -----------
 - Actions Config
 ----
