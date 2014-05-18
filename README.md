@@ -17,6 +17,7 @@ What is AppLauncher?
 ----
 
 	app/DemoApp/Config/actions.ini
+	------------------------------
 
 	[en:home-one]
 	action=DemoApp::DefaultController->defaultAction
@@ -28,15 +29,16 @@ What is AppLauncher?
 ----
 
 	config/databases.ini
+	--------------------
 
 	[default]
     driver = pdo_mysql;
-    host = phpmyadmin.local;
+    host = localhost;
     db_name = '';
     user = 'root';
     password = '';
     port = '';
-    [launch]
+    [db_launch]
     driver = pdo_mysql;
     host = localhost;
     db_name = launch;
