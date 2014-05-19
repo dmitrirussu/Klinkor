@@ -19,9 +19,9 @@ What is AppLauncher?
 	app/DemoApp/Config/actions.ini
 	------------------------------
 
-	[en:home-one]
+	[en:home]
 	action=DemoApp::DefaultController->defaultAction
-	[es:home-fr-one]
+	[es:casa]
 	action=DemoApp::DefaultController->defaultAction
 
 
