@@ -50,7 +50,7 @@ What is AppLauncher?
     password = ;
     port = '';
 
-4. Commands
+4. Console Commands
 ------------
 	'create:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
