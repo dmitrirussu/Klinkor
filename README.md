@@ -10,6 +10,10 @@ What is AppLauncher?
 - App Config
 - App Console Generator
 - ORM DataBase Entities Console Generator
+- OML ORM DataBase Manager (https://github.com/dmitrirussu/OmlManager)
+- Session Manager
+ 
+
 
 3. Configs
 -----------
@@ -19,9 +23,9 @@ What is AppLauncher?
 	app/DemoApp/Config/actions.ini
 	------------------------------
 
-	[en:home-one]
+	[en:home]
 	action=DemoApp::DefaultController->defaultAction
-	[es:home-fr-one]
+	[es:casa]
 	action=DemoApp::DefaultController->defaultAction
 
 
@@ -46,7 +50,7 @@ What is AppLauncher?
     password = ;
     port = '';
 
-4. Commands
+4. Console Commands
 ------------
 	'create:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
