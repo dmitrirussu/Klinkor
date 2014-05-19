@@ -10,6 +10,7 @@ What is AppLauncher?
 - App Config
 - App Console Generator
 - ORM DataBase Entities Console Generator
+- OML DataBase Manager (https://github.com/dmitrirussu/OmlManager)
 
 3. Configs
 -----------
