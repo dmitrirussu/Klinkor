@@ -14,6 +14,7 @@ What is PHP AppLauncher?
 - Session Manager
 - Action Request Manager
 - Action Routing
+- Action Display Layout (Template, HTML, JSON, IMAGE)
  
 
 
