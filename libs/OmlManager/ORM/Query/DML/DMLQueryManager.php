@@ -55,10 +55,13 @@ class DMLQueryManager implements DMLQueryManagerInterface {
 	}
 
 	/**
+	 * @param $object
+	 * @param $sql
+	 * @param array $bindParamValues
 	 * @return NativeQuery
 	 */
-	public function nativeQuery($object, $sql, array $bindParamValues = array()) {
+	public function nativeQuery($sql, array $bindParamValues = array(), $object = null) {
 
-		return new NativeQuery($object, $sql, $bindParamValues);
+		return new NativeQuery($sql, $bindParamValues, $object);
 	}
 } 

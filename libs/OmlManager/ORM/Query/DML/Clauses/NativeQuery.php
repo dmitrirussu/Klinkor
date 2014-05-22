@@ -27,7 +27,7 @@ class NativeQuery {
 	 */
 	private $driver;
 
-	public function __construct($object, $sql, $bindParamValues) {
+	public function __construct($sql, $bindParamValues, $object) {
 		$this->model($object)->query($sql, $bindParamValues);
 	}
 
@@ -62,4 +62,8 @@ class NativeQuery {
 		return $this->driver->fetchOne(get_class($this->model));
 	}
 
+	public function fetchAssoc() {
+
+		return $this->driver->fetchAssoc();
+	}
 } 

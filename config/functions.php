@@ -1,9 +1,8 @@
 <?php
 
-/**
- * @param $className
- */
-function __autoload( $className ) {
+spl_autoload_register('autoload');
+
+function autoload($className) {
 
 	$className = str_replace('\\', '/', $className);
 

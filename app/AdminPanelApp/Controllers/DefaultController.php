@@ -9,7 +9,8 @@ class DefaultController extends AdminPanelAppController {
 
 
 	public function defaultAction() {
- 	
+
+
 		return parent::defaultAction();
 	}
 

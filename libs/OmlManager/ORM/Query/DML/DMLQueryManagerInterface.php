@@ -41,5 +41,5 @@ interface DMLQueryManagerInterface {
 	/**
 	 * @return NativeQuery
 	 */
-	public function nativeQuery($object, $sql, array $bindParamValues = array());
+	public function nativeQuery($sql, array $bindParamValues = array(), $object = null);
 } 

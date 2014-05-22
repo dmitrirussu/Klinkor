@@ -45,7 +45,7 @@ class EntityGenerator extends Generator {
 			throw new GeneratorException('Was not possible to create Package Class File');
 		}
 
-		$class = GeneratorConf::$_NAMESPACE . $this->schemaName.'Package;';
+		$class = GeneratorConf::$_NAMESPACE . $this->schemaNameSpace . $this->schemaName.'Package;';
 
 		$class .= str_replace(
 			array(GeneratorConf::CLASS_NAME, GeneratorConf::PACKAGE_NAME, GeneratorConf::DATABASE_NAME, GeneratorConf::DRIVER_CONF, GeneratorConf::DRIVER_NAME),
@@ -79,10 +79,10 @@ class EntityGenerator extends Generator {
 		$f = fopen($this->realPath . '/' . $schemaName.'Package/Model/' . $className.'.php', 'w');
 
 		//entity package namespace
-		$namespace = GeneratorConf::$_NAMESPACE . $schemaName . "Package\\Model;\n";
+		$namespace = GeneratorConf::$_NAMESPACE . $this->schemaNameSpace . $schemaName . "Package\\Model;\n";
 
 		//namespace use package
-		$namespace .= GeneratorConf::$_USE . $schemaName ."Package\\{$schemaName};";
+		$namespace .= GeneratorConf::$_USE . $this->schemaNameSpace . $schemaName ."Package\\{$schemaName};";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\OmlORManager;";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\Drivers\\DriverTransactionInterface;
 ";
@@ -129,10 +129,10 @@ class EntityGenerator extends Generator {
 		$f = fopen($this->realPath . '/' . $schemaName.'Package/Store/' . $className.'.php', 'w');
 
 		//entity package namespace
-		$namespace = GeneratorConf::$_NAMESPACE . $schemaName . "Package\\Store;\n";
+		$namespace = GeneratorConf::$_NAMESPACE . $this->schemaNameSpace .$schemaName . "Package\\Store;\n";
 
 		//namespace use package
-		$namespace .= GeneratorConf::$_USE . $schemaName ."Package\\{$schemaName};";
+		$namespace .= GeneratorConf::$_USE . $this->schemaNameSpace . $schemaName ."Package\\{$schemaName};";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\OmlORManager;";
 
 		//Entity comment
