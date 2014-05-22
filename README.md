@@ -1,4 +1,4 @@
-What is AppLauncher?
+What is PHP AppLauncher?
 ====
 
 1. Multi Language Web FrameWork!
@@ -12,6 +12,8 @@ What is AppLauncher?
 - ORM DataBase Entities Console Generator
 - OML ORM DataBase Manager (https://github.com/dmitrirussu/OmlManager)
 - Session Manager
+- Action Request Manager
+- Action Routing
  
 
 

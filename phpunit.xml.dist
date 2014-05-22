@@ -7,7 +7,7 @@
          stopOnSkipped="false"
          verbose="true">
 	<testsuites>
-		<testsuite name="RJson-php compressor and decompressor Array Data">
+		<testsuite name="PHP AppLauncher Framework">
 			<directory suffix="OmlManagerTest.php">./tests</directory>
 		</testsuite>
 	</testsuites>
