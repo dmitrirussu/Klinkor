@@ -8,8 +8,8 @@ What is PHP AppLauncher?
 2. Include
 ------------
 - App Config
-- App Console Generator
-- ORM DataBase Entities Console Generator
+- App Package Generator (using console)
+- ORM DataBase Entities Generator (using console)
 - OML ORM DataBase Manager (https://github.com/dmitrirussu/OmlManager)
 - Session Manager
 - Action Request Manager
