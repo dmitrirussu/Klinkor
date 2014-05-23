@@ -53,7 +53,6 @@ class ValueTypeValidator implements ValueTypeInterface {
 
 			switch($this->type) {
 				case ValueTypes::VALUE_TYPE_BIT:
-				case ValueTypes::VALUE_TYPE_TINYINT:
 				case ValueTypes::VALUE_TYPE_BOOLEAN:
 				case ValueTypes::VALUE_TYPE_BOOL: {
 
@@ -69,9 +68,10 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_SMALLINT:
 				case ValueTypes::VALUE_TYPE_MEDIUMINT:
 				case ValueTypes::VALUE_TYPE_BIGINT:
+				case ValueTypes::VALUE_TYPE_TINYINT:
 				case ValueTypes::VALUE_TYPE_INT: {
 
-					if ( !is_int($this->value) ) {
+					if ( !is_int($this->value) && !is_bool($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be integer');
 					}
@@ -161,6 +161,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 				//int
 				ValueTypes::VALUE_TYPE_INT,
 				ValueTypes::VALUE_TYPE_SMALLINT,
+				ValueTypes::VALUE_TYPE_TINYINT,
 				ValueTypes::VALUE_TYPE_MEDIUMINT,
 				ValueTypes::VALUE_TYPE_BIGINT,
 				//float
@@ -180,7 +181,6 @@ class ValueTypeValidator implements ValueTypeInterface {
 				ValueTypes::VALUE_TYPE_TIMESTAMP,
 				//boolean
 				ValueTypes::VALUE_TYPE_BIT,
-				ValueTypes::VALUE_TYPE_TINYINT,
 				ValueTypes::VALUE_TYPE_BOOL,
 				ValueTypes::VALUE_TYPE_BOOLEAN,
 				//null

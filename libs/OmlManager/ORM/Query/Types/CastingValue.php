@@ -99,7 +99,6 @@ class CastingValue {
 	public function getCastingDataType() {
 		switch($this->type) {
 			case ValueTypes::VALUE_TYPE_BIT:
-			case ValueTypes::VALUE_TYPE_TINYINT:
 			case ValueTypes::VALUE_TYPE_BOOLEAN:
 			case ValueTypes::VALUE_TYPE_BOOL: {
 
@@ -110,6 +109,7 @@ class CastingValue {
 			case ValueTypes::VALUE_TYPE_SMALLINT:
 			case ValueTypes::VALUE_TYPE_MEDIUMINT:
 			case ValueTypes::VALUE_TYPE_BIGINT:
+			case ValueTypes::VALUE_TYPE_TINYINT:
 			case ValueTypes::VALUE_TYPE_INT: {
 
 				$this->value = '(int)';

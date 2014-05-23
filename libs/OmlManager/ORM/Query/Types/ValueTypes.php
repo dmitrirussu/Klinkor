@@ -12,6 +12,7 @@ namespace OmlManager\ORM\Query\Types;
 class ValueTypes {
 	//number
 	const VALUE_TYPE_INT = 'int';
+	const VALUE_TYPE_TINYINT = 'tinyint';
 	const VALUE_TYPE_SMALLINT = 'smallint';
 	const VALUE_TYPE_MEDIUMINT = 'mediumint';
 	const VALUE_TYPE_BIGINT = 'bigint';
@@ -30,7 +31,6 @@ class ValueTypes {
 
 	//boolean
 	const VALUE_TYPE_BIT = 'bit';
-	const VALUE_TYPE_TINYINT = 'tinyint';
 	const VALUE_TYPE_BOOL = 'bool';
 	const VALUE_TYPE_BOOLEAN = 'boolean';
 	const VALUE_TYPE_NULL = 'null';
