@@ -32,24 +32,4 @@ class OmlManagerEntitiesGeneratorTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertTrue($result);
 	}
-
-	public function testOmlFetchAll() {
-
-		$pages = \DemoApp\Models\LaunchPackage\Model\Pages::oml()->fetch();
-
-		$this->assertTrue((bool)count($pages));
-	}
-
-	public function testOmlInsert() {
-
-		$page = new \DemoApp\Models\LaunchPackage\Model\Pages();
-
-		$page->setPKey('about_us');
-		$page->setIdProjectController(10);
-
-
-		$result = \OmlManager\ORM\OmlORManager::oml()->model($page)->flush();
-
-		$this->assertTrue($result);
-	}
 } 
