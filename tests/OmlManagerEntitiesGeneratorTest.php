@@ -6,8 +6,7 @@
  * ${NAMESPACE}${NAME} 
  */
 
-class OmlManagerTest extends PHPUnit_Framework_TestCase {
-
+class OmlManagerEntitiesGeneratorTest extends PHPUnit_Framework_TestCase {
 
 	/**
 	 * Generate Database Entities
@@ -53,5 +52,4 @@ class OmlManagerTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertTrue($result);
 	}
-
 } 
