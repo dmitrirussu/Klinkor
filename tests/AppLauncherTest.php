@@ -19,7 +19,7 @@ class AppLauncherTest extends PHPUnit_Framework_TestCase {
 		Launch::app(new \DemoApp\DemoAppController(Request::session()
 				->getVar('lang', Request::get('lang', 'char', \DemoApp\DemoAppController::DEFAULT_LANG_CODE))
 		), 'dev')
-			->addApp(new \AdminPanelApp\AdminPanelAppController())
+			->addApp(new \DemoSecuredApp\DemoSecuredAppController())
 			->registerAppFacade()
 			->display();
 	}
