@@ -33,17 +33,26 @@ class AppLauncherTest extends PHPUnit_Framework_TestCase {
 
 		$result = (bool)system('php console/generator.php create:app:alias DemoAlias Demo');
 
-		echo "Generate DemoApp\n";
+		echo "Generate DemoAliasApp from DemoApp\n";
 
 		$this->assertTrue($result);
 
 	}
 
-	public function testCreate() {
+	public function testCreateSecuredApp() {
 
-		$result = (bool)system('php console/generator.php create:app:alias DemoAlias Demo');
+		$result = (bool)system('php console/generator.php create:secured:app DemoSecured');
 
-		echo "Generate DemoApp\n";
+		echo "Generate DemoSecuredApp\n";
+
+		$this->assertTrue($result);
+	}
+
+	public function testCreateSecuredPage() {
+
+		$result = (bool)system('php console/generator.php create:secured:app:controller DemoSecured EditArticles');
+
+		echo "Generate Secured AppController EditArticles\n";
 
 		$this->assertTrue($result);
 	}
