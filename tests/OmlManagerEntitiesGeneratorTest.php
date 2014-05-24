@@ -19,17 +19,4 @@ class OmlManagerEntitiesGeneratorTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertTrue($result);
 	}
-
-
-	/**
-	 * Generate Db Entity
-	 */
-	public function testGenerateDbEntity() {
-
-		$result = (bool)system('php console/generator.php create:app:db:entity demo launch bugs');
-
-		echo "Generate DB entity\n";
-
-		$this->assertTrue($result);
-	}
 } 
