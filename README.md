@@ -1,6 +1,11 @@
 What is PHP AppLauncher?
 ====
 
+- AppLauncher is an Framework which offer possibility to develop Applications and components of app. An application can contain multiple components. This framework offer possibility to create an Security Application like Admin Panel, or App Alias.
+
+- What is an AppAlias it is like this, function sizeof() is an alias of count(), 
+but you can do the same DemoTwoApp can be an Alias of DemoApp. Only DemoTwoApp can have other layout templates or other styles, actions, new Controllers, new Models DataBase, behavior of DemoTwoApp is other. When you generate an App as Alias your App will Extend all Controllers and Aplication Core from DemoApp.  
+
 1. Multi Language Web FrameWork!
 ------------
 
