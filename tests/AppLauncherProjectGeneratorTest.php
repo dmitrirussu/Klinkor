@@ -31,6 +31,7 @@ class AppLauncherTest extends PHPUnit_Framework_TestCase {
 
 	public function testCreateAppAlias() {
 
+
 		$result = (bool)system('php console/generator.php create:app:alias Demo DemoAlias');
 
 		echo "Generate DemoAliasApp from DemoApp\n";
