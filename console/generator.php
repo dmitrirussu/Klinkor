@@ -12,7 +12,7 @@ $action = (isset($argv[1]) ? $argv[1] : null);
 $registeredCommands = array(
 	'create:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
-	'create:app:alias' => 'php generator.php create:app:alias [PROJECT_ALIAS_NAME] [PROJECT_NAME]',
+	'create:app:alias' => 'php generator.php create:app:alias [PROJECT_NAME] [PROJECT_ALIAS_NAME]',
 	'create:secured:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:secured:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
 	'create:app:db:entities' => 'php generator.php create:db:entities [PROJECT_NAME] [DATABASE_CONF_NAME]',
@@ -30,11 +30,11 @@ try {
 			break;
 		}
 		case 'create:app:alias': {
-			$appAliasName = (isset($argv[3]) ? $argv[3] : null);
 			$appName = (isset($argv[2]) ? $argv[2] : null);
+			$appAliasName = (isset($argv[3]) ? $argv[3] : null);
 
-			\AppLauncher\Generator\AppGeneratorFactory::create($appName, dirname(__DIR__))
-				->createAppAlias($appAliasName);
+			\AppLauncher\Generator\AppGeneratorFactory::create($appAliasName, dirname(__DIR__))
+				->createAppAlias($appName);
 
 			break;
 		}
