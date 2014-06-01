@@ -103,6 +103,7 @@ try {
 				throw new Exception('Project directory does not exist, see command -> '. $registeredCommands[$action]);
 			}
 
+
 			\OmlManager\ORM\SchemaEntitiesGenerator\OmlEntitiesGeneratorFactory
 				::create($dataBaseName, dirname(__DIR__).'/app/'.$projectAppName.'/Models/', $projectAppName.'\\Models\\')
 				->generateEntity($entityName);
