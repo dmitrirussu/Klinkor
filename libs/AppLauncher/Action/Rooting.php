@@ -88,7 +88,7 @@ class Rooting {
 		$key = $langCode . $classAndAction;
 
 		if ( isset(self::$PARSED_URLS[$key]) ) {
-			return self::$PARSED_URLS[$key];
+			return '/'.self::$PARSED_URLS[$key];
 		}
 
 
@@ -104,7 +104,7 @@ class Rooting {
 					$action = '/'.str_replace('Action', '', $actionData[1]);
 				}
 
-				return str_replace('Controller', '', $actionData[0]). $action;
+				return '/'.str_replace('Controller', '', $actionData[0]). $action;
 			}
 
 			return $classAndAction;
@@ -131,7 +131,7 @@ class Rooting {
 					if (isset($urls[0]) && strcasecmp($urls[0], self::$LANG_CODE) === 0 &&
 						in_array($className, $details) && in_array($actionName, $details) ) {
 
-						return self::$PARSED_URLS[$key] = $urls[1];
+						return '/'.self::$PARSED_URLS[$key] = $urls[1];
 					} else {
 
 						self::$PARSED_URLS[$key] = $urls[1];
@@ -141,7 +141,7 @@ class Rooting {
 
 		}
 
-		$action = str_replace('Action', '', $actionName);
+		$action = substr($actionName, 0, strlen($actionName) - strlen('Action'));
 		$action = ($action === 'default' ? '' : '/'.$action);
 		$app = explode('::', $className);
 
@@ -150,7 +150,7 @@ class Rooting {
 			throw new RootingException('Missing Url = ' .$classAndAction);
 		}
 
-		$appName = str_replace('App', '', $app[0]);
+		$appName = (strpos(self::getAppName(), $app[0]) !== false ? '' : $app[0]);
 		$className = '/'.(isset($app[1]) ? str_replace('Controller', '', $app[1]) : 'Default');
 
 		return $appName.$className.$action;
