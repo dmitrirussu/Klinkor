@@ -123,6 +123,13 @@ class RegisterAppFacade {
 						$this->displayJsonEncodedString();
 						break;
 					}
+					case 'd':
+					case 'download' : {
+
+						$this->forceDownloadFile($controllerProjectName);
+
+						break;
+					}
 					case 'r':
 					case 'redirect': {
 
@@ -157,6 +164,20 @@ class RegisterAppFacade {
 				Request::redirect('Error/Page404');
 			}
 		}
+	}
+
+	private function forceDownloadFile($controllerProjectName) {
+		$filePath = PATH_PUBLIC . $controllerProjectName . DIRECTORY_SEPARATOR . $this->response->getFileName();
+
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="'.basename($filePath).'"');
+		header('Content-Transfer-Encoding: binary');
+		header('Connection: Keep-Alive');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Content-Length: ' . filesize($filePath));
 	}
 
 	/**

@@ -34,6 +34,17 @@ class Response {
 		return $this->responseData['display'];
 	}
 
+	public function getFileName() {
+
+		if ( !isset($this->responseData['filename']) ) {
+
+			throw new ResponseException('Action Response attribute [filename] cannot be empty, ' .
+				'define response filename=>(file_name.pdf or image.jpg or file_name.doc)');
+		}
+
+		return $this->responseData['filename'];
+	}
+
 	public function getType() {
 
 		if( !isset($this->responseData['display']) ) {
