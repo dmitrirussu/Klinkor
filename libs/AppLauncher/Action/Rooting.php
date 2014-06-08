@@ -87,12 +87,25 @@ class Rooting {
 		$langCode = self::$LANG_CODE . ':';
 		$key = $langCode . $classAndAction;
 
-
 		if ( isset(self::$PARSED_URLS[$key]) ) {
 			return self::$PARSED_URLS[$key];
 		}
 
+
 		if ( strpos($classAndAction, ':') === false) {
+
+			if ( strpos($classAndAction, '->') !== false ) {
+
+				$actionData = explode('->', $classAndAction);
+				$action = null;
+
+				if ( strpos($classAndAction, 'defaultAction') === false) {
+
+					$action = '/'.str_replace('Action', '', $actionData[1]);
+				}
+
+				return str_replace('Controller', '', $actionData[0]). $action;
+			}
 
 			return $classAndAction;
 		}
@@ -127,7 +140,6 @@ class Rooting {
 			}
 
 		}
-
 
 		$action = str_replace('Action', '', $actionName);
 		$action = ($action === 'default' ? '' : '/'.$action);
@@ -208,7 +220,6 @@ class Rooting {
 
 			$appClassName = $appName.'\\'.$appName.'Controller';
 
-
 			if ( class_exists($appClassName) ) {
 				$appClassObject = new $appClassName();
 
@@ -220,6 +231,19 @@ class Rooting {
 				}
 
 				$controllerName = $appName.'\Controllers\\'.$className;
+			}
+			elseif(class_exists('AppLauncher\\'.$appClassName)) {
+				$appClassName = 'AppLauncher\\'.$appClassName;
+				$appClassObject = new $appClassName();
+
+				//return this controller if is registered
+				if ( !in_array($appClassObject, RegisterApp::instance()->getRegisteredApps()) ) {
+
+					$appName = explode('\\', self::getAppName());
+					$appName = $appName[0];
+				}
+
+				$controllerName = 'AppLauncher\\'.$appName.'\Controllers\\'.$className;
 			}
 			else {
 				$className = (isset($urlInfo[0]) ? ucfirst($urlInfo[0]) : 'Default').'Controller';
@@ -237,7 +261,7 @@ class Rooting {
 			}
 
 			return array(
-				'class' => $appName.'\Controllers\\'.$className,
+				'class' => $controllerName,
 				'action' => $actionName
 			);
 		}
@@ -265,7 +289,6 @@ class Rooting {
 					$actionData = explode('->', $actions[$key]['action']);
 					break;
 				}
-
 			}
 		}
 

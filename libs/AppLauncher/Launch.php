@@ -9,6 +9,7 @@
 namespace AppLauncher;
 
 
+use ErrorApp\ErrorAppController;
 use AppLauncher\Interfaces\AppControllerInterface;
 use AppLauncher\Interfaces\RegisterAppInterface;
 
@@ -17,6 +18,7 @@ class Launch {
 	const ENV_DEV = 'dev';
 	const ENV_PROD = 'prod';
 
+	private static $CURRENT_ENV = self::ENV_PROD;
 
 	private function __construct() {}
 	private function __clone() {}
@@ -27,19 +29,37 @@ class Launch {
 	 * @param string $env
 	 * @return RegisterAppInterface
 	 */
-	public static function app(AppControllerInterface $baseApp, $env = 'prod') {
-		self::displayErrors($env);
+	public static function app(AppControllerInterface $baseApp, $env = self::ENV_PROD) {
+		self::$CURRENT_ENV = $env;
+		self::displayErrors();
 
 		//App Registrar
-		return RegisterApp::instance()->addBaseApp($baseApp);
+		return RegisterApp::instance()->addBaseApp($baseApp)->addApp(new ErrorAppController());
 	}
 
 	/**
-	 * Display errors
-	 * @param $env
+	 * Check is Dev Environment
+	 * @return bool
 	 */
-	private static function displayErrors($env) {
-		if ( $env == self::ENV_DEV ) {
+	public static function isDevEnvironment() {
+
+		return self::ENV_DEV === self::$CURRENT_ENV;
+	}
+
+	/**
+	 * Check is Dev Environment
+	 * @return bool
+	 */
+	public static function isProdEnvironment() {
+
+		return self::ENV_PROD === self::$CURRENT_ENV;
+	}
+
+	/**
+	 * Display Errors
+	 */
+	private static function displayErrors() {
+		if ( self::isDevEnvironment() ) {
 			ini_set('display_startup_errors', 1);
 			ini_set('display_errors', 1);
 			error_reporting(E_ALL);

@@ -117,10 +117,17 @@ class HTML {
 
 		if ( self::getIsProjectApp() ) {
 			$templateFile = PATH_APP.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
+			$templateLibsFile = PATH_LIBS.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
+
 			if ( file_exists($templateFile) ) {
 				$tplNotFound = true;
 
 				require_once $templateFile;
+			}
+			elseif ( file_exists($templateLibsFile) ) {
+				$tplNotFound = true;
+
+				require_once $templateLibsFile;
 			}
 		}
 		else {
@@ -129,10 +136,19 @@ class HTML {
 
 				foreach(self::$APP_NAMES AS $appName) {
 					$templateFile = PATH_APP.$appName.'/Views/'.$tplName.self::TPL_EXT;
+					$templateLibsFile = PATH_LIBS.$appName.'/Views/'.$tplName.self::TPL_EXT;
+
 					if ( file_exists($templateFile) ) {
 						$tplNotFound = true;
 
 						require_once $templateFile;
+
+						break;
+					}
+					elseif ( file_exists($templateLibsFile) ) {
+						$tplNotFound = true;
+
+						require_once $templateLibsFile;
 
 						break;
 					}

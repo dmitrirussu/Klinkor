@@ -69,33 +69,6 @@ class FormValidator {
 
 	/**
 	 *
-	 *	Adds unvalidated class to thos elements that are not validated. Removes them from classes that are.
-	 */
-	public function getScript() {
-		$output = null;
-
-		if(!empty($this->errors)) {
-
-			$errors = array();
-			foreach($this->errors as $key=>$val) { $errors[] = "'INPUT[name={$key}]'"; }
-
-			$output = '$$('.implode(',', $errors).').addClass("unvalidated");';
-			$output .= "alert('there are errors in the form');"; // or your nice validation here
-		}
-
-		if(!empty($this->corrects)) {
-			$corrects = array();
-			foreach($this->corrects as $key) { $corrects[] = "'INPUT[name={$key}]'"; }
-			$output .= '$$('.implode(',', $corrects).').removeClass("unvalidated");';
-		}
-
-		$output = "<script type='text/javascript'>".$output."</script>";
-
-		return $output;
-	}
-
-	/**
-	 *
 	 * Sanatizes an array of items according to the $this->sanatations
 	 * sanatations will be standard of type string, but can also be specified.
 	 * For ease of use, this syntax is accepted:

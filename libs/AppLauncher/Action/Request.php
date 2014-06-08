@@ -91,6 +91,15 @@ class Request {
 	public static function session($name = 'global') {
 		return new Session($name);
 	}
+
+	/**
+	 * Redirect
+	 * @param $url
+	 */
+	public static function redirect($url) {
+
+		header('Location: '. $url);
+	}
 }
 
 class RequestException extends \Exception {
