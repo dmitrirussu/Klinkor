@@ -13,7 +13,9 @@
 <div role="navigation" class="navbar navbar-default navbar-fixed-top">
 	<div class="container">
 		<div class="navbar-header">
-			<a href="/" class="navbar-brand">AppLauncher</a>
+			<a href="/" class="navbar-brand">
+				<img style="position: absolute; top: 7px;" src="/public/ErrorApp/img/app-launcher-logo.png">
+			</a>
 		</div>
 		<div class="navbar-collapse collapse">
 		</div>
