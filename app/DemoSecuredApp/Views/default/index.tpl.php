@@ -1,0 +1,1 @@
+<h1>Welcome to default Page from Secured App</h1>
