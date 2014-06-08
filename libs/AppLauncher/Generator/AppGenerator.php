@@ -136,7 +136,7 @@ class AppGenerator {
 					AppGeneratorConf::CONTENT),
 				array('__construct',
 					'$langCode = self::DEFAULT_LANG_CODE',
-					"\n\t\t\$this->addCSSFile('styles');\n\t\t\$this->addJScriptFile('jquery');\n\t\t\$this->addJScriptFile('scripts');
+					"\n\t\t\$this->addCSSFile('styles');\n\t\t\$this->addJScriptFile('jq/jquery');\n\t\t\$this->addJScriptFile('scripts');
 					\n\t\tparent::__construct(\$langCode);"), AppGeneratorConf::$_METHOD);
 
 			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('defaultAction', '', "\n\t\treturn new Response();"), AppGeneratorConf::$_METHOD);
