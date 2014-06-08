@@ -65,6 +65,29 @@ What is PHP AppLauncher?
 	[es:casa]
 	action=DemoApp::DefaultController->defaultAction
 
+- Action Response
+
+
+	public function defaultAction() {
+
+		return array(
+			'display' => 'index', 'type' => 'html'
+		);
+	}
+
+	public function countriesAction() {
+
+		return array(
+			'display' => 'countries', 'type' => 'html_block'
+		);
+	}
+
+	public function anOtherAction() {
+
+		return array(
+			'display' => 'DemoApp::DefaultController->defaultAction', 'type' => 'redirect'
+		);
+	}
 
 - DataBase configuration
 ----
