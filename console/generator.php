@@ -3,7 +3,7 @@
 function __autoload($className) {
 	$className = str_replace('\\', '/', $className);
 	$phpExt = '.php';
-	require_once dirname(__DIR__).'../libs/'.$className.$phpExt;
+	require_once dirname(__DIR__).'/libs/'.$className.$phpExt;
 }
 
 $action = (isset($argv[1]) ? $argv[1] : null);

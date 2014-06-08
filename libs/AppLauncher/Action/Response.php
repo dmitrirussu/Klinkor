@@ -9,10 +9,12 @@
 namespace AppLauncher\Action;
 
 
+use AppLauncher\Exceptions\ResponseException;
+
 class Response {
 
-	private static $_DISPLAY = array('display' => 'index', 'type' => 'html');
-	private static $_REDIRECT = array('redirect' => 'DemoApp::DefaultController->defaultAction');
+	private static $_DISPLAY = array('display' => 'index', 'type' => 'html', 'layout' => 'index');
+	private static $_REDIRECT = array('display' => 'DemoApp::DefaultController->defaultAction', 'type' => 'redirect');
 
 	private $responseData;
 
@@ -21,17 +23,24 @@ class Response {
 		$this->responseData = $response;
 	}
 
-	public function getUrl() {
+	public function getDisplay() {
 
-		return $this->responseData['redirect'];
-	}
+		if ( !isset($this->responseData['display']) ) {
 
-	public function getTemplate() {
+			throw new ResponseException('Action Response attribute [type] cannot be empty, ' .
+				'define response type=>(html, json, redirect)');
+		}
 
 		return $this->responseData['display'];
 	}
 
 	public function getType() {
+
+		if( !isset($this->responseData['display']) ) {
+
+			throw new ResponseException('Action Response attribute [display] cannot be empty, ' .
+				'define response display=>(file name, rooting url)');
+		}
 
 		return $this->responseData['type'];
 	}
@@ -40,4 +49,4 @@ class Response {
 
 		return $this->responseData;
 	}
-} 
+}
