@@ -130,9 +130,20 @@ class AppGenerator {
 			}
 
 			$use = str_replace(AppGeneratorConf::_NAMESPACE, 'AppLauncher\Controller', AppGeneratorConf::$_USE);
-			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('__construct', '$langCode = self::DEFAULT_LANG_CODE', "\n\t\tparent::__construct(\$langCode);"), AppGeneratorConf::$_METHOD);
+			$method .= str_replace(
+				array(AppGeneratorConf::METHOD_NAME,
+					AppGeneratorConf::METHOD_PARAMS,
+					AppGeneratorConf::CONTENT),
+				array('__construct',
+					'$langCode = self::DEFAULT_LANG_CODE',
+					"\n\t\t\$this->addCSSFile('styles');\n\t\t\$this->addJScriptFile('jquery');\n\t\t\$this->addJScriptFile('scripts');
+					\n\t\tparent::__construct(\$langCode);"), AppGeneratorConf::$_METHOD);
+
 			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('defaultAction', '', "\n\t\treturn new Response();"), AppGeneratorConf::$_METHOD);
 			$extend = 'extends Controller';
+
+			file_put_contents($this->path .'/public/'. $this->appName .'/js/scripts.css', '');
+			file_put_contents($this->path .'/public/'. $this->appName .'/css/styles.css', '');
 		}
 		else {
 
