@@ -142,7 +142,7 @@ class AppGenerator {
 			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('defaultAction', '', "\n\t\treturn new Response();"), AppGeneratorConf::$_METHOD);
 			$extend = 'extends Controller';
 
-			file_put_contents($this->path .'/public/'. $this->appName .'/js/scripts.css', '');
+			file_put_contents($this->path .'/public/'. $this->appName .'/js/scripts.js', '');
 			file_put_contents($this->path .'/public/'. $this->appName .'/css/styles.css', '');
 		}
 		else {
