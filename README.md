@@ -31,7 +31,7 @@ What is PHP AppLauncher?
 	->registerAppFacade()
 	->display();
 
-1. Multi Language Web FrameWork!
+1. Multi Language Web Framework!
 ------------
 
 
@@ -50,7 +50,7 @@ What is PHP AppLauncher?
 
 3. Configs
 -----------
-- Actions Config
+- Actions rooting config
 ----
 
 	app/DemoApp/Config/actions.ini
@@ -62,7 +62,7 @@ What is PHP AppLauncher?
 	action=DemoApp::DefaultController->defaultAction
 
 
-- DataBase Configuration
+- DataBase configuration
 ----
 
 	config/databases.ini
@@ -83,7 +83,7 @@ What is PHP AppLauncher?
     password = ;
     port = '';
 
-4. Console Commands
+4. Console commands
 ------------
 	'create:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
