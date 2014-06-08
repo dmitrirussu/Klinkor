@@ -6,7 +6,7 @@
  * ${NAMESPACE}${NAME} 
  */
 
-class AppLauncherTest extends PHPUnit_Framework_TestCase {
+class AppLauncherProjectGeneratorTest extends PHPUnit_Framework_TestCase {
 
 
 	public function testCreateApp() {
