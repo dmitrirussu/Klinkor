@@ -65,8 +65,9 @@ What is PHP AppLauncher?
 	[es:casa]
 	action=DemoApp::DefaultController->defaultAction
 
-- Action Response
 
+- Action Response
+----
 
 	public function defaultAction() {
 
