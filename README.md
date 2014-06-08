@@ -21,15 +21,19 @@ What is PHP AppLauncher?
 - How you can define add an Component
 
 ---------
-	Launch::app(
-	new \DemoTwoAliasApp\DemoTwoAliasAppController(
-	Request::session()
-	->getVar('lang', Request::get('lang', 'char', \DemoApp\DemoAppController::DEFAULT_LANG_CODE))
-	), 'dev')
-	->addApp(new \AdminPanelApp\AdminPanelAppController()) //here is Your App Component
-	->addApp(new \TranslationComponentApp\TranslationComponentAppController()) //here is Your App Component
-	->registerAppFacade()
-	->display();
+
+	require_once 'config/defines.php';
+    require_once 'config/functions.php';
+
+    use AppLauncher\Launch;
+    use \AppLauncher\Action\Request;
+
+    Launch::app(new \DemoAliasApp\DemoAliasAppController(Request::session()
+    		->getVar('lang', Request::get('lang', 'char', \DemoApp\DemoAppController::DEFAULT_LANG_CODE))
+    ), 'dev')
+    	->addApp(new \DemoSecuredApp\DemoSecuredAppController())
+    	->registerAppFacade()
+    	->display();
 
 1. Multi Language Web Framework!
 ------------
