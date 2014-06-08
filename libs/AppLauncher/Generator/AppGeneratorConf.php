@@ -14,6 +14,7 @@ class AppGeneratorConf {
 	const EXTEND_CLASS = '[EXTEND_CLASS]';
 	const CONTENT = '[CONTENT]';
 	const METHOD_NAME = '[METHOD_NAME]';
+	const METHOD_PARAMS = '[PARAMS]';
 
 	const _NAMESPACE = '[NAMESPACE]';
 
@@ -22,5 +23,5 @@ class AppGeneratorConf {
 	public static $_NAMESPACE = "namespace [NAMESPACE];\n\n";
 	public static $_USE = "use [NAMESPACE];\n";
 
-	public static $_METHOD = "\tpublic function [METHOD_NAME]() {\n \t[CONTENT]\n\t}\n\n";
+	public static $_METHOD = "\tpublic function [METHOD_NAME]([PARAMS]) {\n \t[CONTENT]\n\t}\n\n";
 } 

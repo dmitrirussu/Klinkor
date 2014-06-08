@@ -130,7 +130,8 @@ class AppGenerator {
 			}
 
 			$use = str_replace(AppGeneratorConf::_NAMESPACE, 'AppLauncher\Controller', AppGeneratorConf::$_USE);
-			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::CONTENT), array('defaultAction', "\n\t\treturn new Response();"), AppGeneratorConf::$_METHOD);
+			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('__construct', '$langCode = self::DEFAULT_LANG_CODE', "\n\t\tparent::__construct(\$langCode);"), AppGeneratorConf::$_METHOD);
+			$method .= str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('defaultAction', '', "\n\t\treturn new Response();"), AppGeneratorConf::$_METHOD);
 			$extend = 'extends Controller';
 		}
 		else {
@@ -185,7 +186,7 @@ class AppGenerator {
 		}
 		else {
 			$use = str_replace(AppGeneratorConf::_NAMESPACE, $this->appName.'\\'.$appControllerName, AppGeneratorConf::$_USE);
-			$method = str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::CONTENT), array('defaultAction', "\n\t\treturn parent::defaultAction();"), AppGeneratorConf::$_METHOD);
+			$method = str_replace(array(AppGeneratorConf::METHOD_NAME, AppGeneratorConf::METHOD_PARAMS, AppGeneratorConf::CONTENT), array('defaultAction', '', "\n\t\treturn parent::defaultAction();"), AppGeneratorConf::$_METHOD);
 		}
 
 
@@ -232,18 +233,37 @@ class AppGenerator {
 			if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/index.tpl.php') && !$isAlias) {
 
 				file_put_contents($this->path.'/app/' . $this->appName.'/Views/index.tpl.php', '
-<?php \AppLauncher\HTML::block(\'header\'); ?>
-<?php \AppLauncher\HTML::block($tplName); ?>
+<?php \AppLauncher\HTML::block(\'header\', array(\'javaScriptFiles\' => $javaScriptFiles, \'cssFiles\' => $cssFiles)); ?>
+<?php \AppLauncher\HTML::block($tplName, $globalVars); ?>
 <?php \AppLauncher\HTML::block(\'footer\'); ?>
 ');
 
-				file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', '
-<html>
-<head></head>
+				file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', "
+<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+	<meta charset=\"UTF-8\">
+	<title>{$this->appName}</title>
+	<?php if (\$cssFiles): ?>
+		<?php foreach(\$cssFiles AS \$file): ?>
+			<link rel=\"stylesheet\" type=\"text/css\" href=\"/public/global/css/<?php echo(\$file); ?>.css\" />
+		<?php endforeach; ?>
+	<?php endif; ?>
+
+<?php if (\$javaScriptFiles): ?>
+	<?php foreach(\$javaScriptFiles AS \$file): ?>
+		<script type=\"text/javascript\" language=\"javascript\" src=\"/public/global/js/<?php echo(\$file); ?>.js\"></script>
+	<?php endforeach; ?>
+<?php endif; ?>
+</head>
 <body>
-');
+<div class=\"header\"></div>
+<div class=\"container\">
+");
 
 				file_put_contents($this->path.'/app/' . $this->appName.'/Views/footer.tpl.php', '
+</div>
+<div class="footer"></div>
 </body>
 </html>
 			');
