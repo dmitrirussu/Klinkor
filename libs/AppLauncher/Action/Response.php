@@ -26,9 +26,9 @@ class Response {
 	public function getDisplay() {
 
 		if ( !isset($this->responseData['display']) ) {
+			throw new ResponseException('Action Response attribute [display] cannot be empty, ' .
+				'define response display=>(file name, rooting url)');
 
-			throw new ResponseException('Action Response attribute [type] cannot be empty, ' .
-				'define response type=>(html, json, redirect)');
 		}
 
 		return $this->responseData['display'];
@@ -47,10 +47,10 @@ class Response {
 
 	public function getType() {
 
-		if( !isset($this->responseData['display']) ) {
+		if( !isset($this->responseData['type']) ) {
 
-			throw new ResponseException('Action Response attribute [display] cannot be empty, ' .
-				'define response display=>(file name, rooting url)');
+			throw new ResponseException('Action Response attribute [type] cannot be empty, ' .
+				'define response type=>(html, json, redirect)');
 		}
 
 		return $this->responseData['type'];

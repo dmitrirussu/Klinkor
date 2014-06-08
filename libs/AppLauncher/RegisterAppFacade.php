@@ -169,15 +169,19 @@ class RegisterAppFacade {
 	private function forceDownloadFile($controllerProjectName) {
 		$filePath = PATH_PUBLIC . $controllerProjectName . DIRECTORY_SEPARATOR . $this->response->getFileName();
 
-		header('Content-Description: File Transfer');
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="'.basename($filePath).'"');
-		header('Content-Transfer-Encoding: binary');
-		header('Connection: Keep-Alive');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		header('Content-Length: ' . filesize($filePath));
+		header("Pragma: public");
+		header("Expires: 0");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: public");
+		header("Content-Description: File Transfer");
+		header("Content-type: application/octet-stream");
+		header("Content-Disposition: attachment; filename=\"".basename($filePath)."\"");
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Length: ".filesize($filePath));
+		ob_end_flush();
+
+		@readfile($filePath);
+		exit;
 	}
 
 	/**
