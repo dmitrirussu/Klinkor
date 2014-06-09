@@ -11,7 +11,7 @@
 * RJson is a good practice to use on your Applications which make requests at server for obtains a big data
 * to client Application.
 */
-namespace RJson;
+namespace AppLauncher\RJson;
 
 class RJson {
 
