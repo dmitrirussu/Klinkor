@@ -9,7 +9,7 @@
 namespace AppLauncher;
 
 
-use ErrorApp\ErrorAppController;
+use ErrorApp\ErrorApp;
 use AppLauncher\Interfaces\AppControllerInterface;
 use AppLauncher\Interfaces\RegisterAppInterface;
 
@@ -34,7 +34,7 @@ class Launch {
 		self::displayErrors();
 
 		//App Registrar
-		return RegisterApp::instance()->addBaseApp($baseApp)->addApp(new ErrorAppController());
+		return RegisterApp::instance()->addBaseApp($baseApp)->addApp(new ErrorApp());
 	}
 
 	/**
