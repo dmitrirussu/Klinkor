@@ -97,7 +97,7 @@ class AppGenerator {
 	 */
 	private function createBaseAppClass($isSecured = false, $appAliasName = '') {
 
-		$appControllerName = $this->appName.'Controller';
+		$appControllerName = $this->appName;
 
 		$appAliasName = ucfirst($appAliasName);
 		$appAliasFolder = $appAliasName.'App';
@@ -147,7 +147,7 @@ class AppGenerator {
 		}
 		else {
 
-			$appAliasName = $appAliasName.'AppController';
+			$appAliasName = $appAliasName.'App';
 
 			$use = str_replace(AppGeneratorConf::_NAMESPACE, $appAliasFolder.'\\'.$appAliasName, AppGeneratorConf::$_USE);
 			$extend = 'extends '.$appAliasName;
@@ -182,7 +182,7 @@ class AppGenerator {
 
 		$controllerName = ucfirst($controllerName);
 		$controllerName .='Controller';
-		$appControllerName = $this->appName.'Controller';
+		$appControllerName = $this->appName;
 		$method = null;
 		$use = null;
 
@@ -236,12 +236,17 @@ class AppGenerator {
 	public function createView($tplDirectoryName, $isAlias = false, $createTplOnly = false) {
 		$tplDirectoryName = strtolower($tplDirectoryName);
 
+		//check is not alias
+		$appClassReflection = new \ReflectionClass('\\'.$this->appName.'\\'.$this->appName);
+		$isNotAlias = 'AppLauncher\Controller' === $appClassReflection->getParentClass()->getName();
+
 		if ( !is_dir($this->path.'/app/' . $this->appName.'/Views/'.$tplDirectoryName) ) {
+
 			mkdir($this->path.'/app/' . $this->appName.'/Views/'.$tplDirectoryName, 0777, true);
 		}
 
 		if ( !$createTplOnly ) {
-			if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/index.tpl.php') && !$isAlias) {
+			if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/index.tpl.php') && $isNotAlias) {
 
 				file_put_contents($this->path.'/app/' . $this->appName.'/Views/index.tpl.php', '
 <?php \AppLauncher\HTML::block(\'header\', array(\'javaScriptFiles\' => $javaScriptFiles, \'cssFiles\' => $cssFiles)); ?>
@@ -249,7 +254,9 @@ class AppGenerator {
 <?php \AppLauncher\HTML::block(\'footer\'); ?>
 ');
 
-				file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', "
+				if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/header.tpl.php') && $isNotAlias) {
+
+					file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', "
 <!DOCTYPE html>
 <html lang=\"en\">
 <head>
@@ -271,16 +278,18 @@ class AppGenerator {
 <div class=\"header\"></div>
 <div class=\"container\">
 ");
+				}
+			}
 
-				file_put_contents($this->path.'/app/' . $this->appName.'/Views/footer.tpl.php', '
-</div>
+			if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/footer.tpl.php') && $isNotAlias ) {
+
+				file_put_contents($this->path.'/app/' . $this->appName.'/Views/footer.tpl.php', '</div>
 <div class="footer"></div>
 </body>
-</html>
-			');
+</html>');
 			}
-		}
 
+		}
 
 		if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/'.$tplDirectoryName.'/index.tpl.php') && !$isAlias) {
 
