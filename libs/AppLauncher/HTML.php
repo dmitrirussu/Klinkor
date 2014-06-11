@@ -158,7 +158,7 @@ class HTML {
 
 		if ( !$tplNotFound ) {
 
-			throw new \AppLauncher\Exceptions\HTMLException('Template not found');
+			throw new \AppLauncher\Exceptions\HTMLException('Template not found tplName='.$tplName);
 		}
 
 		ob_end_flush();
