@@ -6,16 +6,16 @@ function autoload($className) {
 
 	$className = str_replace('\\', '/', $className);
 
-	if ( @include_once $className .'.php' ) {
+	if ( @include_once dirname(__DIR__).$className .'.php' ) {
 
-		require_once $className .'.php';
+		require_once dirname(__DIR__).$className .'.php';
 	}
-	elseif( @include_once('libs\\'.$className.'.php') ) {
+	elseif( @include_once(dirname(__DIR__).'\\libs\\'.$className.'.php') ) {
 
-		require_once 'libs\\'.$className .'.php';
+		require_once dirname(__DIR__).'\\libs\\'.$className .'.php';
 	}
-	elseif( @include_once('app\\'.$className.'.php') ) {
+	elseif( @include_once(dirname(__DIR__).'\\app\\'.$className.'.php') ) {
 
-		require_once('app\\'.$className.'.php');
+		require_once(dirname(__DIR__).'\\app\\'.$className.'.php');
 	}
 }

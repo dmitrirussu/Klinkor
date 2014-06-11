@@ -1,10 +1,7 @@
 <?php
 
-function __autoload($className) {
-	$className = str_replace('\\', '/', $className);
-	$phpExt = '.php';
-	require_once dirname(__DIR__).'/libs/'.$className.$phpExt;
-}
+require_once dirname(__DIR__).'/config/defines.php';
+require_once dirname(__DIR__).'/config/functions.php';
 
 $action = (isset($argv[1]) ? $argv[1] : null);
 
@@ -43,7 +40,6 @@ try {
 			$controllerName = (isset($argv[3]) ? $argv[3] : null);
 
 			\AppLauncher\Generator\AppGeneratorFactory::create($appName, dirname(__DIR__))
-				->createApp()
 				->createAppController($controllerName)->createView($controllerName, false, true);
 
 			break;

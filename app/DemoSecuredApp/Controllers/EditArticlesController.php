@@ -1,11 +1,11 @@
 <?php 
 namespace DemoSecuredApp\Controllers;
 
-use DemoSecuredApp\DemoSecuredAppController;
+use DemoSecuredApp\DemoSecuredApp;
 use AppLauncher\Action\Response;
 
 
-class EditArticlesController extends DemoSecuredAppController {
+class EditArticlesController extends DemoSecuredApp {
 
 
 	public $isSecured = true;

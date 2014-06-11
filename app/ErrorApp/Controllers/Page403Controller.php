@@ -1,11 +1,11 @@
 <?php 
 namespace ErrorApp\Controllers;
 
-use ErrorApp\ErrorAppController;
+use ErrorApp\ErrorApp;
 use AppLauncher\Action\Response;
 
 
-class Page403Controller extends ErrorAppController {
+class Page403Controller extends ErrorApp {
 
 
 	public function defaultAction() {

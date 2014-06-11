@@ -5,7 +5,7 @@ use AppLauncher\Controller;
 use AppLauncher\Action\Response;
 
 
-class ErrorAppController extends Controller {
+class ErrorApp extends Controller {
 
 	public function __construct() {
 		

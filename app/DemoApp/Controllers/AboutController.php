@@ -1,11 +1,11 @@
 <?php 
 namespace DemoApp\Controllers;
 
-use DemoApp\DemoAppController;
+use DemoApp\DemoApp;
 use AppLauncher\Action\Response;
 
 
-class AboutController extends DemoAppController {
+class AboutController extends DemoApp {
 
 
 	public function defaultAction() {

@@ -6,9 +6,9 @@ require_once 'config/functions.php';
 use AppLauncher\Launch;
 use \AppLauncher\Action\Request;
 
-Launch::app(new \DemoAliasApp\DemoAliasAppController(Request::session()
-		->getVar('lang', Request::get('lang', 'char', \DemoApp\DemoAppController::DEFAULT_LANG_CODE))
+Launch::app(new \DemoAliasApp\DemoAliasApp(Request::session()
+		->getVar('lang', Request::get('lang', 'char', \AppLauncherApp\AppLauncherApp::DEFAULT_LANG_CODE))
 ), 'dev')
-	->addApp(new \DemoSecuredApp\DemoSecuredAppController())
+	->addApp(new \DemoSecuredApp\DemoSecuredApp())
 	->registerAppFacade()
 	->display();

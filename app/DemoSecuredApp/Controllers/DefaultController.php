@@ -1,11 +1,11 @@
 <?php 
 namespace DemoSecuredApp\Controllers;
 
-use DemoSecuredApp\DemoSecuredAppController;
+use DemoSecuredApp\DemoSecuredApp;
 use AppLauncher\Action\Response;
 
 
-class DefaultController extends DemoSecuredAppController {
+class DefaultController extends DemoSecuredApp {
 
 
 	public $isSecured = false;
