@@ -88,7 +88,7 @@ class Rooting {
 		$key = $langCode . $classAndAction;
 
 		if ( isset(self::$PARSED_URLS[$key]) ) {
-			return '/'.self::$PARSED_URLS[$key];
+			return '/'.trim(self::$PARSED_URLS[$key], '/');
 		}
 
 
@@ -114,7 +114,7 @@ class Rooting {
 
 		if ( !$classActions ) {
 
-			return array();
+			return $classAndAction;
 		}
 
 		$data = self::getRootesIni();
@@ -131,7 +131,7 @@ class Rooting {
 					if (isset($urls[0]) && strcasecmp($urls[0], self::$LANG_CODE) === 0 &&
 						in_array($className, $details) && in_array($actionName, $details) ) {
 
-						return '/'.self::$PARSED_URLS[$key] = $urls[1];
+						return '/'.self::$PARSED_URLS[$key] = trim($urls[1], '/');
 					} else {
 
 						self::$PARSED_URLS[$key] = $urls[1];
@@ -153,7 +153,7 @@ class Rooting {
 		$appName = '/'.(strpos(self::getAppName(), $app[0]) !== false ? '' : $app[0]);
 		$className = '/'.(isset($app[1]) ? str_replace('Controller', '', $app[1]) : 'Default');
 
-		return str_replace(array('//', '\\'), array('/', '/'), $appName.$className.$action);
+		return '/'.trim($appName.$className.$action, '/');
 	}
 
 	/**
@@ -218,7 +218,7 @@ class Rooting {
 			$className = (isset($urlInfo[1]) ? ucfirst($urlInfo[1]) : 'Default').'Controller';
 			$actionName = (isset($urlInfo[2]) ? $urlInfo[2] : 'default').'Action';
 
-			$appClassName = $appName.'\\'.$appName.'Controller';
+			$appClassName = $appName.'\\'.$appName;
 
 			if ( class_exists($appClassName) ) {
 				$appClassObject = new $appClassName();
