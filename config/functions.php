@@ -4,7 +4,7 @@ spl_autoload_register('autoload');
 
 function autoload($className) {
 
-	$className = str_replace('\\', '/', $className);
+	$className = '/'.trim(str_replace('\\', '/', $className), '/');
 
 	if ( @include_once dirname(__DIR__).$className .'.php' ) {
 
