@@ -153,7 +153,7 @@ class Rooting {
 		$appName = (strpos(self::getAppName(), $app[0]) !== false ? '' : $app[0]);
 		$className = '/'.(isset($app[1]) ? str_replace('Controller', '', $app[1]) : 'Default');
 
-		return $appName.$className.$action;
+		return '/'.str_replace(array('//', '\\'), array('/', '/'), $appName.$className.$action);
 	}
 
 	/**
