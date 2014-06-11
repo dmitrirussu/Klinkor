@@ -132,9 +132,6 @@ class Rooting {
 						in_array($className, $details) && in_array($actionName, $details) ) {
 
 						return '/'.self::$PARSED_URLS[$key] = trim($urls[1], '/');
-					} else {
-
-						self::$PARSED_URLS[$key] = $urls[1];
 					}
 				}
 			}
