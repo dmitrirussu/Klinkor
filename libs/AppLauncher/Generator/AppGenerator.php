@@ -83,6 +83,7 @@ class AppGenerator {
 			mkdir($appPath.'/Config', 777, true);
 			mkdir($appPath.'/Controllers', 777, true);
 			mkdir($appPath.'/Models', 777, true);
+			mkdir($appPath.'/Forms', 777, true);
 			mkdir($appPath.'/Views', 777, true);
 			mkdir($public.'/js', 777, true);
 			mkdir($public.'/css', 777, true);
