@@ -224,7 +224,7 @@ class Reader implements ReaderInterface {
 	 * @return mixed
 	 */
 	public function getValueByFieldName($fieldName) {
-
+		$fieldName = trim($fieldName);
 		$reflector = new \ReflectionObject($this->model);
 		$reflectorProperty = $reflector->getProperty($fieldName);
 		$reflectorProperty->setAccessible(true);
@@ -240,8 +240,4 @@ class Reader implements ReaderInterface {
 		unset($this->modelPrimaryKey);
 		unset($this->reflectionModelClass);
 	}
-}
-
-class ReaderException extends \Exception {
-
 }
