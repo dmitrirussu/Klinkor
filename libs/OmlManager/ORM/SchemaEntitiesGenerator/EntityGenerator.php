@@ -9,6 +9,7 @@
 namespace OmlManager\ORM\SchemaEntitiesGenerator;
 
 use OmlManager\ORM\Query\Types\CastingValue;
+use OmlManager\ORM\Query\Types\ValueTypes;
 
 class EntityGenerator extends Generator {
 
@@ -151,6 +152,7 @@ class EntityGenerator extends Generator {
 	}
 
 	/**
+	 * Add Entity Fields And Set Get Methods
 	 * @param $entityName
 	 * @param $string
 	 * @return string
@@ -186,6 +188,17 @@ class EntityGenerator extends Generator {
 				$castingDataType = new CastingValue('', $fieldType);
 
 				//Method Doc Comment
+
+				//write enum values Method
+				if ( $fieldType === ValueTypes::VALUE_TYPE_ENUM ) {
+
+					preg_match_all("/'([\w ]*)'/", $entity->Type, $enumValues);
+
+					$method .= str_replace(GeneratorConf::TYPE, '(array)', GeneratorConf::$_METHOD_DOC_COMMENT);
+					$method .= str_replace(
+						array(GeneratorConf::FUNC_NAME, GeneratorConf::CONTENT),
+						array($funcName.'List', 'array('.implode(',', $enumValues[0]).');'), GeneratorConf::$_GET_METHOD);
+				}
 
 				$method .= str_replace(GeneratorConf::TYPE, $castingDataType->getPHPValueType(), GeneratorConf::$_METHOD_DOC_COMMENT);
 
