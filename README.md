@@ -120,3 +120,8 @@ What is PHP AppLauncher?
 	'create:secured:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
 	'create:app:db:entities' => 'php generator.php create:db:entities [PROJECT_NAME] [DATABASE_CONF_NAME]',
 	'create:app:db:entity' => 'php generator.php create:db:entity [PROJECT_NAME] [DATABASE_CONF_NAME] [TABLE_NAME]'
+
+
+App Launcher Future
+===
+- HTML Form Builder, based on OML ORM Manager - <a href="https://github.com/dmitrirussu/OmlManager">OML ORM Manager</a>
