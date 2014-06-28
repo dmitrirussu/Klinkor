@@ -194,7 +194,7 @@ class EntityGenerator extends Generator {
 
 					preg_match_all("/'([\w ]*)'/", $entity->Type, $enumValues);
 
-					$method .= str_replace(GeneratorConf::TYPE, '(array)', GeneratorConf::$_METHOD_DOC_COMMENT);
+					$method .= str_replace(GeneratorConf::TYPE, 'array', GeneratorConf::$_METHOD_DOC_COMMENT);
 					$method .= str_replace(
 						array(GeneratorConf::FUNC_NAME, GeneratorConf::CONTENT),
 						array($funcName.'List', 'array('.implode(',', $enumValues[0]).');'), GeneratorConf::$_GET_METHOD);
