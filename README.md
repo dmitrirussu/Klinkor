@@ -121,7 +121,39 @@ What is PHP AppLauncher?
 	'create:app:db:entities' => 'php generator.php create:db:entities [PROJECT_NAME] [DATABASE_CONF_NAME]',
 	'create:app:db:entity' => 'php generator.php create:db:entity [PROJECT_NAME] [DATABASE_CONF_NAME] [TABLE_NAME]'
 
+5. Form Builder based on OML ORM Manager - <a href="https://github.com/dmitrirussu/OmlManager">OML ORM Manager</a>
+-------------
+
+		use ApplauncherApp\Models\LaunchPackage\Model\Articls;
+		use ApplauncherApp\Models\LaunchPackage\Model\Categories;
+		use ApplauncherApp\Models\LaunchPackage\Model\KeywordTranslations;
+		use HtmlFormBuilder\FormBuilder;
+		use OmlManager\ORM\OmlORManager;
+
+		$form = new FormBuilder(new Articls(),
+			array(
+			'fields'=> array(
+				'id_category' => array(
+					'keyword' => 'Categories',
+					'data' => OmlORManager::oml()->model(new Categories())->fetch(),
+					'key' => 'ct_key',
+					'fields' => array('ct_key', 'ct_type'),
+					'type' => 'select'
+				),
+
+			),
+			'buttons' => array(
+				'submit' => 'Save',
+				'reset' => array('active' => true, 'keyword' => 'reset')
+			)));
+
+
+		$form->setModel(new KeywordTranslations());
+		$form->setModel(new Categories());
+
+		$this->assign('form', $form);
+
 
 App Launcher Future
 ===
-- HTML Form Builder, based on OML ORM Manager - <a href="https://github.com/dmitrirussu/OmlManager">OML ORM Manager</a>
+- HTML Form Builder, Form Validator
