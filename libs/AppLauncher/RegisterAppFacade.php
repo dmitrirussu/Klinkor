@@ -178,8 +178,6 @@ class RegisterAppFacade {
 		header("Content-Disposition: attachment; filename=\"".basename($filePath)."\"");
 		header("Content-Transfer-Encoding: binary");
 		header("Content-Length: ".filesize($filePath));
-		ob_end_flush();
-
 		@readfile($filePath);
 		exit;
 	}
