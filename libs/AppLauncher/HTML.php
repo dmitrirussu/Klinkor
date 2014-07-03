@@ -17,6 +17,7 @@ class HTML {
 
 	private static $IS_PROJECT_APP = false;
 	private static $APP_NAME;
+	private static $APP_PAGE_NAME;
 
 	private function __construct(){}
 	private function __clone(){}
@@ -72,6 +73,26 @@ class HTML {
 	}
 
 	/**
+	 * Set App Action Name
+	 * @param $actionName
+	 * @return $this
+	 */
+	public function setAppPageName($actionName) {
+		self::$APP_PAGE_NAME = $actionName;
+
+		return $this;
+	}
+
+	/**
+	 * Get App Action Name
+	 * @return mixed
+	 */
+	public static function getAppPageName() {
+
+		return self::$APP_PAGE_NAME;
+	}
+
+	/**
 	 * Add Project Extended Application
 	 *
 	 * @param $appName
@@ -100,29 +121,41 @@ class HTML {
 	 * @param array $vars
 	 * @throws Exceptions\HTMLException
 	 */
-	public static function block($tplName, $vars = array()) {
-
+	public static function block($tplName, $vars = array(), $isMain = false) {
 		$tplNotFound = false;
 
 		//assign Var to TPL
 		if ( $vars ) {
-
 			foreach($vars AS $key => $value) {
-
 				$$key = $value;
 			}
 		}
 
 		ob_start();
 
+		$templateDirectory = ($isMain ? '' : self::getAppPageName().DIRECTORY_SEPARATOR);
+
 		if ( self::getIsProjectApp() ) {
-			$templateFile = PATH_APP.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
-			$templateLibsFile = PATH_LIBS.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
+
+			$templateFile = PATH_APP.self::getAppName().'/Views/'. $templateDirectory.$tplName.self::TPL_EXT;
+			$templateLibsFile = PATH_LIBS.self::getAppName().'/Views/'. $templateDirectory.$tplName.self::TPL_EXT;
+			$templateInMainDirectory = PATH_APP.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
+			$templateInMainLibsDirectory = PATH_LIBS.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
 
 			if ( file_exists($templateFile) ) {
 				$tplNotFound = true;
 
 				require_once $templateFile;
+			}
+			elseif(file_exists($templateInMainDirectory)) {
+				$tplNotFound = true;
+
+				require_once $templateInMainDirectory;
+			}
+			elseif(file_exists($templateInMainLibsDirectory)) {
+				$tplNotFound = true;
+
+				require_once $templateInMainLibsDirectory;
 			}
 			elseif ( file_exists($templateLibsFile) ) {
 				$tplNotFound = true;
@@ -135,21 +168,33 @@ class HTML {
 			if ( self::$APP_NAMES ) {
 
 				foreach(self::$APP_NAMES AS $appName) {
-					$templateFile = PATH_APP.$appName.'/Views/'.$tplName.self::TPL_EXT;
-					$templateLibsFile = PATH_LIBS.$appName.'/Views/'.$tplName.self::TPL_EXT;
+					$templateFile = PATH_APP.$appName.'/Views/'.$templateDirectory.$tplName.self::TPL_EXT;
+					$templateLibsFile = PATH_LIBS.$appName.'/Views/'.$templateDirectory.$tplName.self::TPL_EXT;
+					$templateInMainDirectory = PATH_APP.$appName.'/Views/'.$tplName.self::TPL_EXT;
+					$templateInMainLibsDirectory = PATH_LIBS.$appName.'/Views/'.$tplName.self::TPL_EXT;
 
 					if ( file_exists($templateFile) ) {
 						$tplNotFound = true;
 
 						require_once $templateFile;
+						break;
+					}
+					elseif(file_exists($templateInMainDirectory)) {
+						$tplNotFound = true;
 
+						require_once $templateInMainDirectory;
+						break;
+					}
+					elseif(file_exists($templateInMainLibsDirectory)) {
+						$tplNotFound = true;
+
+						require_once $templateInMainLibsDirectory;
 						break;
 					}
 					elseif ( file_exists($templateLibsFile) ) {
 						$tplNotFound = true;
 
 						require_once $templateLibsFile;
-
 						break;
 					}
 				}

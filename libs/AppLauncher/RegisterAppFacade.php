@@ -77,13 +77,16 @@ class RegisterAppFacade {
 				$controllerProjectName = str_replace('\\Controllers', '', $reflectionControllerClass->getNamespaceName());
 				$isProjectApp = (!in_array($controllerProjectName, HTML::instance()->getApps()) ? true : false);
 
+
+
+				$tplDirectory = explode('\\', strtolower(str_replace('Controller', '', $this->controller)));
+				$this->tplDirectory = strtolower(end($tplDirectory));
+
 				//Set Is Project App
 				HTML::instance()
 					->setIsProjectApp($isProjectApp)
-					->setAppName($controllerProjectName);
-
-				$tplDirectory = explode('\\', strtolower(str_replace('Controller', '', $this->controller)));
-				$this->tplDirectory = end($tplDirectory);
+					->setAppName($controllerProjectName)
+					->setAppPageName($this->tplDirectory);
 
 				//check if class has method
 				if ( !$reflectionControllerClass->hasMethod($this->action) ) {
@@ -191,7 +194,7 @@ class RegisterAppFacade {
 
 		$this->controller->assign('javaScriptFiles', $this->controller->getAssignedJavaScriptFiles());
 		$this->controller->assign('cssFiles', $this->controller->getAssignedCSSFiles());
-		$this->controller->assign('tplName', $this->tplDirectory . DIRECTORY_SEPARATOR . $this->response->getDisplay());
+		$this->controller->assign('tplName', $this->response->getDisplay());
 
 		$this->controller->assign('globalVars', $this->controller->getAssignedVars());
 
