@@ -99,6 +99,7 @@ class Request {
 	public static function redirect($url) {
 
 		header('Location: '. $url);
+		exit;
 	}
 }
 
