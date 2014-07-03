@@ -27,7 +27,7 @@ class DriversConfig implements DriverConfigInterface {
 
 	private static $DBS_CONNECTIONS;
 	private $confName;
-	const DATABASE_CONF_FILE_PATH = '../../../../Config/databases.ini';
+	const DATABASE_CONF_FILE_PATH = '/../../../Config/databases.ini';
 
 
 	public function __construct($dbConfigName = 'default') {
@@ -44,8 +44,8 @@ class DriversConfig implements DriverConfigInterface {
 		//Conf for TEST Database
 		self::$DBS_CONNECTIONS->default = new \stdClass();
 		self::$DBS_CONNECTIONS->default->driver = self::DRIVER_PDO_MYSQL;
-		self::$DBS_CONNECTIONS->default->host = 'phpmyadmin.local';
-		self::$DBS_CONNECTIONS->default->db_name = 'launch';
+		self::$DBS_CONNECTIONS->default->host = 'localhost';
+		self::$DBS_CONNECTIONS->default->db_name = 'test';
 		self::$DBS_CONNECTIONS->default->user = 'root';
 		self::$DBS_CONNECTIONS->default->password = '';
 		self::$DBS_CONNECTIONS->default->port = '';
