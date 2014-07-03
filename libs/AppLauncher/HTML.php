@@ -119,6 +119,7 @@ class HTML {
 	 * Include Template Block
 	 * @param $tplName
 	 * @param array $vars
+	 * @param bool $isMain
 	 * @throws Exceptions\HTMLException
 	 */
 	public static function block($tplName, $vars = array(), $isMain = false) {
