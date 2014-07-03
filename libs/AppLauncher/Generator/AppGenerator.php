@@ -257,8 +257,7 @@ class AppGenerator {
 
 				if ( !file_exists($this->path.'/app/' . $this->appName.'/Views/header.tpl.php') && $isNotAlias) {
 
-					file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', "
-<!DOCTYPE html>
+					file_put_contents($this->path.'/app/' . $this->appName.'/Views/header.tpl.php', "<!DOCTYPE html>
 <html lang=\"en\">
 <head>
 	<meta charset=\"UTF-8\">
