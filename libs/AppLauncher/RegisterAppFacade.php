@@ -14,6 +14,7 @@ use AppLauncher\Action\Exceptions\RootingException;
 use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
 use AppLauncher\Action\Rooting;
+use AppLauncher\Secure\User;
 
 class RegisterAppFacade {
 
@@ -97,6 +98,11 @@ class RegisterAppFacade {
 				}
 
 				$this->controller = new $this->controller();
+
+				if ( !User::isLogged() && $this->controller->isSecured() ) {
+
+					Request::redirect(Rooting::url('DefaultController->defaultAction'));
+				}
 
 				/**
 				 * @var $result Response

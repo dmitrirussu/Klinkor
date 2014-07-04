@@ -544,6 +544,11 @@ class Expression implements ExpressionInterface {
 
 				break;
 			}
+			case 'like': {
+				$this->like($value);
+
+				break;
+			}
 
 			default: {
 				if ( empty($operator) ) {

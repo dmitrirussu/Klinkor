@@ -8,7 +8,7 @@
 
 namespace OmlManager\ORM\Query\Types;
 
-use OmlManager\ORM\Query\Types\ValueTypes;
+
 
 class ValueTypeValidator implements ValueTypeInterface {
 
@@ -26,7 +26,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 
 	public function __construct($value, $type, $fieldName = null) {
 		$this->value = $value;
-		$this->type = (is_null($value) && in_array($type, self::$_VALUE_TYPES_STRINGS) ? ValueTypes::VALUE_TYPE_NULL : $type);
+		$this->type = (is_null($value) && !in_array($type, self::$_VALUE_TYPES_STRINGS) ? ValueTypes::VALUE_TYPE_NULL : $type);
 		$this->fieldName = $fieldName;
 	}
 

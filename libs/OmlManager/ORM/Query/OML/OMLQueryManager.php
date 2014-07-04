@@ -13,6 +13,7 @@ use OmlManager\ORM\OmlORManager;
 use OmlManager\ORM\Models\Reader;
 use OmlManager\ORM\Query\Expression\Expression;
 use OmlManager\ORM\Query\Expression\ExpressionInterface;
+use OmlManager\ORM\Query\OML\Exceptions\OMLQueryManagerExceptions;
 
 class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperationsInterface,
 									OMLQueryManagerDeleteOperation, OMLQueryManagerBatchOperation, DriverTransactionInterface {
@@ -81,9 +82,9 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		if (empty($fieldName) || empty($value) || empty($operator)) {
+		if (empty($fieldName) || empty($operator)) {
 
-			throw new OMLQueryManagerExceptions('Primary Key value cannot be empty');
+			throw new OMLQueryManagerExceptions('FieldName cannot be empty');
 		}
 
 		$exp = new Expression();
@@ -107,9 +108,9 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		if (empty($fieldName) || empty($value) || empty($operator)) {
+		if (empty($fieldName) || empty($operator)) {
 
-			throw new OMLQueryManagerExceptions('Primary Key value cannot be empty');
+			throw new OMLQueryManagerExceptions('Field name cannot be empty');
 		}
 
 		$exp = new Expression();
@@ -343,8 +344,4 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 		return OmlORManager::ddl()->package($this->model, true)->rollbackTransaction();
 	}
-}
-
-class OMLQueryManagerExceptions extends \Exception {
-
 }

@@ -13,7 +13,7 @@ use AppLauncher\Action\Response;
 interface AppControllerInterface {
 
 	/**
-	 * @return mixed|Response
+	 * @return Response
 	 */
 	public function defaultAction();
 	public function getDBManager();
@@ -22,6 +22,7 @@ interface AppControllerInterface {
 	/**
 	 * @return AppControllerInterface
 	 */
+	public function isSecured();
 	public function getLangCode();
 	public function getAssignedVars();
 	public function getAssignedJavaScriptFiles();

@@ -9,7 +9,9 @@ namespace AppLauncher;
 
 use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
+use AppLauncher\Action\Rooting;
 use AppLauncher\Interfaces\AppControllerInterface;
+use AppLauncher\Secure\Login;
 use OmlManager\ORM\OmlORManager;
 
 abstract class Controller implements AppControllerInterface {
@@ -128,5 +130,14 @@ abstract class Controller implements AppControllerInterface {
 	public function getAssignedVars() {
 
 		return $this->assignedTemplateVars;
+	}
+
+	/**
+	 * Get Is secured controller
+	 * @return bool
+	 */
+	public function isSecured() {
+
+		return $this->isSecured;
 	}
 }
