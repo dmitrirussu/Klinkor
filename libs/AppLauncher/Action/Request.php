@@ -11,6 +11,8 @@ namespace AppLauncher\Action;
 
 class Request {
 
+	private static $session;
+
 	public function __construct() {}
 	private function __clone() {}
 
@@ -88,8 +90,19 @@ class Request {
 		return $castingValue->getValue();
 	}
 
+	/**
+	 * Session life time 30 minutes
+	 * @param string $name
+	 * @return Session
+	 */
 	public static function session($name = 'global') {
-		return new Session($name);
+
+		if ( empty(self::$session) ) {
+
+			self::$session = new Session($name);
+		}
+
+		return self::$session;
 	}
 
 	/**

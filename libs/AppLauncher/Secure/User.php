@@ -55,11 +55,13 @@ class User {
 	}
 
 	/**
+	 * Login user by nickname and his Password
 	 * @param $nickname
 	 * @param $password
+	 * @param $remember
 	 * @return bool
 	 */
-	public static function login($nickname, $password) {
+	public static function login($nickname, $password, $remember = false) {
 
 		if ( empty($nickname) || empty($password) || !Login::verify($password, self::getHashedPassword())) {
 
@@ -68,6 +70,11 @@ class User {
 
 		Request::session()->setVar('nickname', $nickname);
 		Request::session()->setVar('password', $password);
+
+		//Set is Remember Life Time until 31 days
+		if ( $remember ) {
+			Request::session()->setSessionLifeTime((3600 * 24) * 31);
+		}
 
 		return true;
 	}

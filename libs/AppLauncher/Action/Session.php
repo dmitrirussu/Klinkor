@@ -11,15 +11,57 @@ namespace AppLauncher\Action;
 
 class Session {
 
+
 	private $sessionName;
 
+	const DEFAULT_LIFETIME = 1800;
 
 
+	/**
+	 * @param string $name
+	 */
 	public function __construct($name = 'global') {
 
 		$this->sessionName = $name;
-
 		@session_start();
+
+		if ($this->getLastActivityTime() && (time() - $this->getLastActivityTime() > $this->getSessionLifeTime())) {
+
+			$this->destroy();
+		}
+
+		$this->updateLastActivityTime();
+	}
+
+
+	/**
+	 * Get Session Life Time
+	 * @return null
+	 */
+	public function getSessionLifeTime() {
+
+		return $this->getVar('lifeTime', self::DEFAULT_LIFETIME);
+	}
+
+	/**
+	 * Set Session LifeTime
+	 * @param $time
+	 */
+	public function setSessionLifeTime($time) {
+
+		$this->setVar('lifeTime', $time);
+	}
+
+	public function updateLastActivityTime() {
+
+		$this->setVar('lastActivityTime', time());
+	}
+
+	/**
+	 * @return null
+	 */
+	public function getLastActivityTime() {
+		return $this->getVar('lastActivityTime', false);
 	}
 
 	/**
