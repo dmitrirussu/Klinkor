@@ -402,7 +402,7 @@ class FormBuilder {
 	 * @param $objects
 	 */
 	private static function buildForm(ModelFieldsReader $reader, $model, &$objects) {
-		$action = (isset($model['options']['action']) ? isset($model['options']['action']) : null);
+		$action = (isset($model['options']['action']) ? $model['options']['action'] : null);
 		$method = (isset($model['options']['method']) ? $model['options']['method'] : FormObjects::FORM_METHOD_POST);
 
 		$form = str_replace(
