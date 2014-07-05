@@ -93,7 +93,7 @@ class RegisterApp implements RegisterAppInterface {
 	 *
 	 * @return AppControllerInterface
 	 */
-	public function getBaseApp() {
+	public static function getBaseApp() {
 
 		return self::$BASE_APP;
 	}
@@ -118,7 +118,7 @@ class RegisterApp implements RegisterAppInterface {
 	 *
 	 * @return array
 	 */
-	public function getRegisteredApps() {
+	public static function getRegisteredApps() {
 
 		return self::$APPS;
 	}

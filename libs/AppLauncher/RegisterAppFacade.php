@@ -197,9 +197,8 @@ class RegisterAppFacade {
 	 * @param $controllerProjectName
 	 */
 	private function displayLayoutTemplates($isProjectApp, $controllerProjectName) {
-
-		$this->controller->assign('javaScriptFiles', $this->controller->getAssignedJavaScriptFiles());
-		$this->controller->assign('cssFiles', $this->controller->getAssignedCSSFiles());
+		$this->controller->assign('cssFiles', Scripts::instance()->getCssFiles());
+		$this->controller->assign('javaScriptFiles', Scripts::instance()->getScriptsJs());
 		$this->controller->assign('tplName', $this->response->getDisplay());
 
 		$this->controller->assign('globalVars', $this->controller->getAssignedVars());
@@ -259,18 +258,17 @@ class RegisterAppFacade {
 	 */
 	private function displayJsonEncodedString() {
 
-		$jsonString = $this->response->getDisplay();
-
 		ob_start();
 		header('Content-Type: application/json');
 		if ( is_array($this->response->getDisplay()) ) {
-
 			$jsonString = json_encode($this->response->getDisplay());
+			echo($jsonString);
 		}
-
-		echo($jsonString);
-
+		else {
+			echo('Missing Array Data');
+		}
 		ob_end_flush();
+		exit;
 	}
 }
 

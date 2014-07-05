@@ -23,9 +23,6 @@ abstract class Controller implements AppControllerInterface {
 	protected $isSecured = false;
 
 	private $assignedTemplateVars = array();
-	private $assignedJavaScriptFiles = array();
-	private $assignedCSSFiles = array();
-
 
 	public function __construct($langCode = self::DEFAULT_LANG_CODE) {
 
@@ -87,8 +84,7 @@ abstract class Controller implements AppControllerInterface {
 	 * @return $this
 	 */
 	public function addJScriptFile($fileName) {
-
-		$this->assignedJavaScriptFiles[] = $fileName;
+		Scripts::instance()->addScriptJsFile($fileName);
 
 		return $this;
 	}
@@ -100,7 +96,7 @@ abstract class Controller implements AppControllerInterface {
 	 */
 	public function addCSSFile($fileName) {
 
-		$this->assignedCSSFiles[] = $fileName;
+		Scripts::instance()->addCSSFile($fileName);
 
 		return $this;
 	}
@@ -111,7 +107,7 @@ abstract class Controller implements AppControllerInterface {
 	 */
 	public function getAssignedJavaScriptFiles() {
 
-		return $this->assignedJavaScriptFiles;
+		return Scripts::instance()->getScriptsJs();
 	}
 
 	/**
@@ -120,7 +116,7 @@ abstract class Controller implements AppControllerInterface {
 	 */
 	public function getAssignedCSSFiles() {
 
-		return $this->assignedCSSFiles;
+		return Scripts::instance()->getCssFiles();
 	}
 
 	/**
