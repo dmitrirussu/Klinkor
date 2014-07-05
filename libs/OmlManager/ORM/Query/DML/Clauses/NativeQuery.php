@@ -6,7 +6,7 @@
  * OmlManager\ORM\Query${NAME} 
  */
 
-namespace OmlManager\ORM\Query\DDL\Clauses;
+namespace OmlManager\ORM\Query\DML\Clauses;
 
 
 use OmlManager\ORM\Drivers\DriverInterface;
@@ -23,7 +23,7 @@ class NativeQuery {
 	private $modelReader;
 
 	/**
-	 * @var DriverInterface
+	 * @var \PDOStatement
 	 */
 	private $driver;
 
@@ -47,7 +47,7 @@ class NativeQuery {
 		$this->modelReader = new Reader($this->model);
 
 		$this->driver = SDBManagerConnections::getManager($this->modelReader->getModelDataDriverConfName())
-			->getDriver()->query($sql, $array);
+			->getDriver()->execute($sql, $array);
 
 		return $this;
 	}
@@ -59,11 +59,16 @@ class NativeQuery {
 
 	public function fetchOne() {
 
-		return $this->driver->fetchOne(get_class($this->model));
+		return $this->driver->fetchObject(get_class($this->model));
 	}
 
 	public function fetchAssoc() {
 
-		return $this->driver->fetchAssoc();
+		return $this->driver->fetchAll(\PDO::FETCH_ASSOC);
+	}
+
+	public function fetchOneAssoc() {
+
+		return $this->driver->fetch(\PDO::FETCH_ASSOC);
 	}
 } 
