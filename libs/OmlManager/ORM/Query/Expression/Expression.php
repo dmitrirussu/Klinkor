@@ -12,7 +12,7 @@ use OmlManager\ORM\Models\Reader;
 use OmlManager\ORM\Query\Types\ValueTypeException;
 use OmlManager\ORM\Query\Types\ValueTypeValidator;
 
-class Expression implements ExpressionInterface {
+class Expression extends ExpressionInterface {
 
 	private static $_GROUPED = ' (EXP) ';
 

@@ -8,28 +8,28 @@
 
 namespace OmlManager\ORM\Query\Expression;
 
-interface ExpressionInterface {
+abstract class ExpressionInterface {
 
-	public function field($fieldName);
+	abstract public function field($fieldName);
 
-	public function not();
-	public function like($value);
-	public function in(array $values);
-	public function is($value);
-	public function equal($value);
-	public function less($value);
-	public function lessEqual($value);
-	public function greater($value);
-	public function greaterEqual($value);
-	public function diff($value);
-	public function operation($value, $operator);
+	abstract public function not();
+	abstract public function like($value);
+	abstract public function in(array $values);
+	abstract public function is($value);
+	abstract public function equal($value);
+	abstract public function less($value);
+	abstract public function lessEqual($value);
+	abstract public function greater($value);
+	abstract public function greaterEqual($value);
+	abstract public function diff($value);
+	abstract public function operation($value, $operator);
 
-	public function grouped();
-	public function groupedAnd();
-	public function groupedOr();
-	public function andExp();
-	public function orExp();
+	abstract public function grouped();
+	abstract public function groupedAnd();
+	abstract public function groupedOr();
+	abstract public function andExp();
+	abstract public function orExp();
 
-	public function getExpression();
-	public function checkValuesTypeByModels(array $array);
+	abstract public function getExpression();
+	abstract public function checkValuesTypeByModels(array $array);
 } 
