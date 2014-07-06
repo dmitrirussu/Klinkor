@@ -79,10 +79,10 @@ class Scripts {
 				if ( $javascriptFiles ) {
 					foreach($javascriptFiles as $jsFile) {
 						$fileNameRoot = self::PUBLIC_DIRECTORY.'/'.$app.'/'.$jsFile.'.js';
-						$fileNameRootDir = dirname(__DIR__).'./..'.$fileNameRoot;
+						$fileNameRootDir = dirname(__DIR__).'/..'.$fileNameRoot;
 
 						$fileName = self::PUBLIC_DIRECTORY.'/'.$app.'/js/'.$jsFile.'.js';
-						$fileDir = dirname(__DIR__).'./..'.$fileName;
+						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if ( file_exists($fileNameRootDir) ) {
 							self::writeJs($jsScripts, $fileNameRoot);
@@ -116,10 +116,10 @@ class Scripts {
 				if ( $cssFiles ) {
 					foreach($cssFiles as $cssFile) {
 						$rootFileName = self::PUBLIC_DIRECTORY.'/'.$app.'/'.$cssFile.'.css';
-						$rootFileDir = dirname(__DIR__).'./..'.$rootFileName;
+						$rootFileDir = dirname(__DIR__).'/..'.$rootFileName;
 
 						$fileName = self::PUBLIC_DIRECTORY.'/'.$app.'/css/'.$cssFile.'.css';
-						$fileDir = dirname(__DIR__).'./..'.$fileName;
+						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if (file_exists($rootFileDir)) {
 							self::writeCss($cssLinks, $rootFileName);
