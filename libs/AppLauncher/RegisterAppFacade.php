@@ -109,14 +109,27 @@ class RegisterAppFacade {
 				 */
 				$this->response = $this->controller->{$this->action}();
 
+				if( empty($this->response)) {
+
+					throw new RegisterAppFacadeException('Missing Action Response AC-NAME: ' . $this->action);
+				}
+
 				if ( is_array($this->response) ) {
 
 					$this->response = new Response($this->response);
 				}
+				
+				$this->controller->assign('errors', $this->controller->getErrorMessages());
+				$this->controller->assign('successMessages', $this->controller->getSuccessMessages());
 
 				switch($this->response->getType()) {
 					case 'h':
 					case 'html': {
+
+						//unset errors
+						$this->controller->getRequest()->session()->unsetVar('errors');
+						$this->controller->getRequest()->session()->unsetVar('successMessage');
+
 						$this->displayLayoutTemplates($isProjectApp, $controllerProjectName);
 						break;
 					}
@@ -126,10 +139,26 @@ class RegisterAppFacade {
 						$this->displayHTMLBlock();
 						break;
 					}
+					case 't':
+					case 'text': {
+						$this->displayText();
+						break;
+					}
+					case 'x':
+					case 'xml': {
+						$this->displayXml();
+						break;
+					}
 					case 'j':
 					case 'json': {
 
 						$this->displayJsonEncodedString();
+						break;
+					}
+					case 'f':
+					case 'file': {
+
+						$this->displayFile();
 						break;
 					}
 					case 'd':
@@ -142,7 +171,7 @@ class RegisterAppFacade {
 					case 'r':
 					case 'redirect': {
 
-						$url = $this->response->getDisplay();
+						$url = $this->response->getDisplay() || $this->response->getUrl();
 
 						if ( !filter_var($this->response->getDisplay(), FILTER_VALIDATE_URL) ) {
 
@@ -200,6 +229,7 @@ class RegisterAppFacade {
 		$this->controller->assign('cssFiles', Scripts::instance()->getCssFiles());
 		$this->controller->assign('javaScriptFiles', Scripts::instance()->getScriptsJs());
 		$this->controller->assign('tplName', $this->response->getDisplay());
+		$this->controller->assign('breadCrumbs', $this->controller->getBreadCrumbs());
 
 		$this->controller->assign('globalVars', $this->controller->getAssignedVars());
 
@@ -244,6 +274,15 @@ class RegisterAppFacade {
 		ob_end_flush();
 	}
 
+	private function displayText() {
+		return print ($this->response->getDisplay());
+	}
+
+	private function displayXml() {
+		header("Content-type: text/xml; charset=utf-8");
+		return print ($this->response->getDisplay() ? $this->response->getDisplay() : $this->response->getFileName());
+	}
+
 	/**
 	 * Display HTML Block
 	 */
@@ -267,6 +306,24 @@ class RegisterAppFacade {
 		else {
 			echo('Missing Array Data');
 		}
+		ob_end_flush();
+		exit;
+	}
+
+	/**
+	 * Display File
+	 */
+	private function displayFile() {
+
+		ob_start();
+		// Define HTTP header fields.
+		header('Content-Type: ' . $this->response->getContentType());
+		header('Cache-Control: no-store, no-cache, must-revalidate');
+		header('Content-Length: '.filesize($this->response->getFileName()));
+		header('Content-Disposition: inline; filename='.basename($this->response->getFileName()));
+		header('Content-Transfer-Encoding: binary');
+
+		print (file_get_contents($this->response->getFileName()));
 		ob_end_flush();
 		exit;
 	}

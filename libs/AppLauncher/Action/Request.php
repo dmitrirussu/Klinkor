@@ -53,7 +53,14 @@ class Request {
 		return $_REQUEST;
 	}
 
-	public function getAllFileData() {
+	/**
+	 * @param null $file
+	 * @return null
+	 */
+	public function getAllFileData($file = null) {
+		if($file) {
+			return isset($_FILES[$file]) ? $_FILES[$file] : null;
+		}
 
 		return $_FILES;
 	}

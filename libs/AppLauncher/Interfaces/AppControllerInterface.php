@@ -27,5 +27,13 @@ interface AppControllerInterface {
 	public function getAssignedVars();
 	public function getAssignedJavaScriptFiles();
 	public function getAssignedCSSFiles();
+	public function addErrorMessage($message);
+	public function getErrorMessages();
+	public function addSuccessMessage($message);
+	public function getSuccessMessages();
+	public function addBreadCrumb($name, $action = '', $isActive = true);
+	public function addEndOfBreadCrumb($name, $action = '', $isActive = null);
+	public function getBreadCrumbs();
 	public function assign($varName, $value = null);
+	public function destroyMessages();
 }

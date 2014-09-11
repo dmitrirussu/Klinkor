@@ -62,11 +62,19 @@ class Reader implements ReaderInterface {
 		}
 	}
 
+	/**
+	 * Get Model
+	 * @return mixed
+	 */
 	public function getModel() {
 
 		return $this->model;
 	}
 
+	/**
+	 * Get Model Primary Key
+	 * @return mixed
+	 */
 	public function getModelPrimaryKey() {
 
 		$properties = $this->getModelPropertiesTokens();
@@ -83,6 +91,10 @@ class Reader implements ReaderInterface {
 		return $this->modelPrimaryKey;
 	}
 
+	/**
+	 * Get Model Primary Key Value
+	 * @return mixed
+	 */
 	public function getModelPrimaryKeyValue() {
 
 		$reflector = new \ReflectionObject($this->getModel());
@@ -94,6 +106,29 @@ class Reader implements ReaderInterface {
 		return $propertyValue;
 	}
 
+	/**
+	 * Set Model Primary Key Value
+	 * @param $value
+	 * @return $this
+	 */
+	public function setModelPrimaryKeyValue($value) {
+
+		$reflector = new \ReflectionObject($this->getModel());
+
+		if (  $reflector->hasProperty($this->getModelPrimaryKey()) ) {
+			$reflectorProperty = $reflector->getProperty($this->getModelPrimaryKey());
+			$reflectorProperty->setAccessible(true);
+			$reflectorProperty->setValue($this->getModel(), $value);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get Model Table Name
+	 * @return string
+	 * @throws ReaderException
+	 */
 	public function getModelTableName() {
 
 		if ( !isset($this->modelInfo['table']) ) {
@@ -104,6 +139,11 @@ class Reader implements ReaderInterface {
 		return trim($this->modelInfo['table']);
 	}
 
+	/**
+	 * get Model DataBase Name
+	 * @return string
+	 * @throws ReaderException
+	 */
 	public function getModelDataBaseName() {
 		if ( !isset($this->modelInfo['database']) ) {
 
@@ -113,6 +153,11 @@ class Reader implements ReaderInterface {
 		return trim($this->modelInfo['database']);
 	}
 
+	/**
+	 * Get Model Driver Conf Name
+	 * @return string
+	 * @throws ReaderException
+	 */
 	public function getModelDataDriverConfName() {
 		if ( !isset($this->modelInfo['driver_conf']) ) {
 
@@ -122,6 +167,11 @@ class Reader implements ReaderInterface {
 		return trim($this->modelInfo['driver_conf']);
 	}
 
+	/**
+	 * Get Model Properties
+	 * @return \ReflectionProperty[]
+	 * @throws ReaderException
+	 */
 	public function getModelProperties() {
 		if ( !($properties = $this->reflectionModelClass->getProperties()) ) {
 
@@ -139,7 +189,6 @@ class Reader implements ReaderInterface {
 	public function getModelPropertiesTokens() {
 
 		if ( !($properties = $this->reflectionModelClass->getProperties()) ) {
-
 			throw new ReaderException('Missing properties for Model -> ' . $this->reflectionModelClass->getName());
 		}
 
@@ -155,45 +204,46 @@ class Reader implements ReaderInterface {
 	}
 
 	/**
+	 * Get Properties Tokens
 	 * @return array
 	 * @throws ReaderException
 	 */
 	private function getPropertyTokens() {
 
-		if ( !is_object($this->property) ) {
-			throw new ReaderException('Missing property object');
-		}
+			if ( !is_object($this->property) ) {
+				throw new ReaderException('Missing property object');
+			}
+			$tokens = $this->readTokensFromDocComment($this->property->getDocComment());
 
-		$tokens = $this->readTokensFromDocComment($this->property->getDocComment());
+			if ( empty($tokens) ) {
+				throw new ReaderException('Missing property \''. $this->property->getName() .
+					'\' info, Model ' .
+					$this->reflectionModelClass->getName());
+			}
 
-		if ( empty($tokens) ) {
-			throw new ReaderException('Missing property \''. $this->property->getName() .
-															'\' info, Model ' .
-															$this->reflectionModelClass->getName());
-		}
+			if ( !isset($tokens['field']) ) {
 
-		if ( !isset($tokens['field']) ) {
+				throw new ReaderException('Missing \'field\', property \''. $this->property->getName() .
+					'\', Model ' .
+					$this->reflectionModelClass->getName());
 
-			throw new ReaderException('Missing \'field\', property \''. $this->property->getName() .
-				'\', Model ' .
-				$this->reflectionModelClass->getName());
+			}
 
-		}
-		elseif( !isset($tokens['type']) ) {
+			if( !isset($tokens['type']) ) {
 
-			throw new ReaderException('Missing \'type\', property \''. $this->property->getName() .
-				'\', Model ' .
-				$this->reflectionModelClass->getName());
-		}
-		elseif( isset($tokens['type']) && (!isset($tokens['length']) || $tokens['length'] <= 0) &&
-			in_array($tokens['type'], array(ValueTypes::VALUE_TYPE_CHAR,
-											ValueTypes::VALUE_TYPE_VARCHAR,
-											ValueTypes::VALUE_TYPE_INT))) {
+				throw new ReaderException('Missing \'type\', property \''. $this->property->getName() .
+					'\', Model ' .
+					$this->reflectionModelClass->getName());
+			}
 
-			throw new ReaderException('Missing \'length\', property \''. $this->property->getName() .
-				'\', Model ' .
-				$this->reflectionModelClass->getName());
-		}
+			$inArray = in_array($tokens['type'], array(ValueTypes::VALUE_TYPE_CHAR, ValueTypes::VALUE_TYPE_VARCHAR, ValueTypes::VALUE_TYPE_INT));
+
+			if( isset($tokens['type']) && (!isset($tokens['length']) || ($tokens['length'] <= 0)) && $inArray) {
+
+				throw new ReaderException('Missing \'length\', property \''. $this->property->getName() .
+					'\', Model ' .
+					$this->reflectionModelClass->getName());
+			}
 
 		return $tokens;
 	}
@@ -220,6 +270,7 @@ class Reader implements ReaderInterface {
 	}
 
 	/**
+	 * get Value By Field Name
 	 * @param $fieldName
 	 * @return mixed
 	 */
@@ -231,6 +282,28 @@ class Reader implements ReaderInterface {
 		$propertyValue = $reflectorProperty->getValue($this->model);
 
 		return $propertyValue;
+	}
+
+	/**
+	 * Set Model Field value
+	 * @param $fields
+	 * @return mixed
+	 */
+	public function setModelFieldsValues($fields) {
+
+		foreach ($fields as $fieldName => $value) {
+
+			$fieldName = trim($fieldName);
+			$reflector = new \ReflectionObject($this->model);
+
+			if ( $reflector->hasProperty($fieldName)) {
+				$reflectorProperty = $reflector->getProperty($fieldName);
+				$reflectorProperty->setAccessible(true);
+				$reflectorProperty->setValue($this->model, trim($value));
+			}
+		}
+
+		return $this;
 	}
 
 	public function __destruct() {

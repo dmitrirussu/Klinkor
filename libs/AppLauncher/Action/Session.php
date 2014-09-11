@@ -9,12 +9,14 @@
 namespace AppLauncher\Action;
 
 
+use AppLauncher\Action\Exceptions\SessionException;
+
 class Session {
 
 
 	private $sessionName;
 
-	const DEFAULT_LIFETIME = 1800;
+	const DEFAULT_LIFETIME = 3600;
 
 
 	/**
@@ -229,8 +231,4 @@ class Session {
 	public function __destruct() {
 
 	}
-}
-
-class SessionException extends \Exception {
-
 }

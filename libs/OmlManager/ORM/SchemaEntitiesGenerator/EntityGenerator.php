@@ -159,6 +159,7 @@ class EntityGenerator extends Generator {
 	 * @throws GeneratorException
 	 */
 	private function addEntityFieldsAndSetGetMethods($entityName, &$string) {
+		$constants = null;
 		$attributes = null;
 		$method = null;
 		$entities = $this->getEntityInfo($entityName);
@@ -197,7 +198,14 @@ class EntityGenerator extends Generator {
 					$method .= str_replace(GeneratorConf::TYPE, 'array', GeneratorConf::$_METHOD_DOC_COMMENT);
 					$method .= str_replace(
 						array(GeneratorConf::FUNC_NAME, GeneratorConf::CONTENT),
-						array($funcName.'List', 'array('.implode(',', $enumValues[0]).');'), GeneratorConf::$_GET_METHOD);
+						array($funcName.'List', 'array('.implode(',', $enumValues[0]).');'), GeneratorConf::$_GET_STATIC_METHOD);
+
+					$constFieldName = strtoupper($entity->Field);
+					$constants .= "\n";
+					foreach($enumValues[0] as $enumValue) {
+						$constants .= "\n\tconst {$constFieldName}_".strtoupper(trim($enumValue, "'")) .' = '. $enumValue .';';
+					}
+					$constants .= "\n";
 				}
 
 				$method .= str_replace(GeneratorConf::TYPE, $castingDataType->getPHPValueType(), GeneratorConf::$_METHOD_DOC_COMMENT);
@@ -217,7 +225,7 @@ class EntityGenerator extends Generator {
 			throw new GeneratorException('DataBase table '. $entityName .' does not exist ');
 		}
 
-		return $string .= $attributes.$method;
+		return $string .= $constants.$attributes.$method;
 	}
 
 	/**

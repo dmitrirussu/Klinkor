@@ -72,10 +72,11 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @param $fieldName
 	 * @param $value
 	 * @param string $operator
-	 * @throws OMLQueryManagerExceptions
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchOne($fieldName, $value, $operator = '=') {
+	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array()) {
 
 		if ( empty($this->model) ) {
 
@@ -90,7 +91,13 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$exp = new Expression();
 		$exp->field($fieldName)->operation($value, $operator);
 
-		return OmlORManager::dml()->select()->model($this->model)->expression($exp)->fetchOne();
+		$omlManagerRequest = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+
+		if ( $orderBy ) {
+			$omlManagerRequest->orderBy($orderBy);
+		}
+
+		return $omlManagerRequest->fetchOne();
 	}
 
 	/**
@@ -98,10 +105,11 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @param $value
 	 * @param string $operator
 	 * @param array $limit
-	 * @throws OMLQueryManagerExceptions
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array()) {
+	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array()) {
 
 		if ( empty($this->model) ) {
 
@@ -118,6 +126,10 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
 
+		if ( $orderBy ) {
+			$omeletteManager->orderBy($orderBy);
+		}
+
 		if ( $limit ) {
 			$startOffset = (isset($limit[1]) ? $limit[0] : 0);
 			$endOffset = (!isset($limit[1]) ? $limit[0] : $limit[1]);
@@ -130,17 +142,21 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 	/**
 	 * @param ExpressionInterface $exp
-	 * @throws OMLQueryManagerExceptions
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchOneBy(ExpressionInterface $exp) {
+	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array()) {
 
 		if ( empty($this->model) ) {
 
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
-
-		return OmlORManager::dml()->select()->model($this->model)->expression($exp)->fetchOne();
+		$omlMangerRequest = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		if ( $orderBy ) {
+			$omlMangerRequest->orderBy(array());
+		}
+		return $omlMangerRequest->fetchOne();
 	}
 
 	/**
@@ -149,7 +165,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchAllBy(ExpressionInterface $exp, array $limit = array()) {
+	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array()) {
 
 		if ( empty($this->model) ) {
 
@@ -158,6 +174,10 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
 
+		if ( $orderBy ) {
+			$omeletteManager->orderBy($orderBy);
+		}
+
 		if ( $limit ) {
 
 			$startOffset = (isset($limit[1]) ? $limit[0] : 0);
@@ -171,10 +191,11 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 	/**
 	 * @param array $limit
-	 * @throws OMLQueryManagerExceptions
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetch(array $limit = array()) {
+	public function fetch(array $limit = array(), array $orderBy = array()) {
 
 		if ( empty($this->model) ) {
 
@@ -182,6 +203,10 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		}
 
 		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression(new Expression('1=1'));
+
+		if ( $orderBy ) {
+			$omeletteManager->orderBy($orderBy);
+		}
 
 		if ( $limit ) {
 			$startOffset = (isset($limit[1]) ? $limit[0] : 0);

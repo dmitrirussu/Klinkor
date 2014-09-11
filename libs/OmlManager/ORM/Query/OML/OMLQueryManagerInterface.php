@@ -25,11 +25,11 @@ interface OMLQueryManagerInterface {
 interface OMLQueryMangerOperationsInterface {
 
 	public function fetchByPk($value);
-	public function fetchOne($fieldName, $value, $operator = '=');
-	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array());
-	public function fetchAllBy(ExpressionInterface $exp, array $limit = array());
-	public function fetchOneBy(ExpressionInterface $exp);
-	public function fetch(array $limit = array());
+	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array());
+	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array());
+	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array());
+	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array());
+	public function fetch(array $limit = array(), array $orderBy = array());
 	public function flush();
 }
 

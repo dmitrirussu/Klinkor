@@ -111,10 +111,13 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 	 * @return Reader
 	 */
 	public function getModelReader() {
+		if ( isset($this->models[$this->defaultModelReaderAlias]) ) {
+			return $this->models[$this->defaultModelReaderAlias];
+		}
 
-		return (isset($this->models[$this->defaultModelReaderAlias]) ?
-						$this->models[$this->defaultModelReaderAlias] :
-						$this->models[reset(array_keys($this->models))]);
+		$model = array_keys($this->models);
+
+		return $this->models[reset($model)];
 	}
 
 	public function join($joinPrimaryForeignKey) {

@@ -53,9 +53,14 @@ class InsertClause implements DMLClauseInterface {
 			$sqlStatement = null;
 			$fields = null;
 			$key = 1;
+			$modelReader = null;
 
 			foreach($this->models AS $model) {
-				$modelReader = new Reader($model);
+
+				if ( empty($modelReader) ) {
+					$modelReader = new Reader($model);
+				}
+
 				$dataBaseName = $modelReader->getModelDataBaseName();
 				$dataBaseConfName = $modelReader->getModelDataDriverConfName();
 				$tableName = $modelReader->getModelTableName();
@@ -64,10 +69,11 @@ class InsertClause implements DMLClauseInterface {
 				$statement = array();
 				$fields = array_map(function($field) use ($properties, $modelReader, &$statement, $key) {
 
-					$statement[':'.$field->name.'_'.$key] = $modelReader->getValueByFieldName($field->name);
-
-					return $field->name;
-
+					if ( $modelReader->getValueByFieldName($field->name) !== null) {
+						$statement[':'.$field->name.'_'.$key] = $modelReader->getValueByFieldName($field->name);
+						return $field->name;
+					}
+					return null;
 				}, $properties);
 				$statements = array_merge($statements, $statement);
 				$sqlStatement[] = '('.implode(', ', array_keys($statement)).')';
@@ -76,7 +82,7 @@ class InsertClause implements DMLClauseInterface {
 			}
 
 			$this->_INSERT = str_replace(array(self::TABLE_NAME, self::FIELDS, self::FIELDS_VALUES),
-				array($dataBaseName.'.'.$tableName, implode(', ', $fields), implode(', ', $sqlStatement)), $this->_INSERT);
+				array($dataBaseName.'.'.$tableName, implode(', ', array_filter($fields)), implode(', ', $sqlStatement)), $this->_INSERT);
 
 			$result = SDBManagerConnections::getManager($dataBaseConfName)
 				->getDriver()->execute($this->_INSERT, $statements);
@@ -84,6 +90,18 @@ class InsertClause implements DMLClauseInterface {
 			if ( empty($result) ) {
 
 				return false;
+			}
+			else{
+				//Set Last Inserted ID
+				$data = SDBManagerConnections::getManager($dataBaseConfName)
+					->getDriver()->execute('SELECT LAST_INSERT_ID()', $statements);
+
+				$id = $data->fetch(\PDO::FETCH_NUM);
+
+				if ( isset($id[0]) && !empty($id[0])) {
+					$lastInsertedId = $id[0];
+					$modelReader->setModelPrimaryKeyValue($lastInsertedId);
+				}
 			}
 		}
 

@@ -9,9 +9,7 @@ namespace AppLauncher;
 
 use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
-use AppLauncher\Action\Rooting;
 use AppLauncher\Interfaces\AppControllerInterface;
-use AppLauncher\Secure\Login;
 use OmlManager\ORM\OmlORManager;
 
 abstract class Controller implements AppControllerInterface {
@@ -23,6 +21,12 @@ abstract class Controller implements AppControllerInterface {
 	protected $isSecured = false;
 
 	private $assignedTemplateVars = array();
+
+	private $errorMessages = array();
+	private $successMessages = array();
+
+	private $breadCrumbs = array();
+	private $addBradCrumbsEnabled = true;
 
 	public function __construct($langCode = self::DEFAULT_LANG_CODE) {
 
@@ -129,11 +133,96 @@ abstract class Controller implements AppControllerInterface {
 	}
 
 	/**
+	 * Add Error Message
+	 * @param $message
+	 */
+	public function addErrorMessage($message) {
+		$this->errorMessages[] = $message;
+		$this->getRequest()->session()->setVar('errors', $this->errorMessages);
+	}
+
+	/**
+	 * Get Error Messages
+	 * @return array
+	 */
+	public function getErrorMessages() {
+		return $this->getRequest()->session()->getVar('errors', $this->errorMessages);
+	}
+
+	/**
+	 * Add Success Message
+	 * @param $message
+	 */
+	public function addSuccessMessage($message) {
+		$this->successMessages[] = $message;
+		$this->getRequest()->session()->setVar('successMessage', $this->successMessages);
+	}
+
+	/**
+	 * Get Success Messages
+	 * @return array
+	 */
+	public function getSuccessMessages() {
+		return $this->getRequest()->session()->getVar('successMessage', $this->successMessages);
+	}
+
+	/**
+	 * Destroy Error and Success Messages
+	 * @return bool
+	 */
+	public function destroyMessages() {
+		return $this->getRequest()->session()->unsetVar('errors') == $this->getRequest()->session()->unsetVar('successMessage');
+	}
+
+	/**
 	 * Get Is secured controller
 	 * @return bool
 	 */
 	public function isSecured() {
 
 		return $this->isSecured;
+	}
+
+	/**
+	 * Add Bread Crumb
+	 * @param $name
+	 * @param string $action
+	 * @param bool $isActive
+	 * @return $this
+	 */
+	public function addBreadCrumb($name, $action = '', $isActive = null) {
+
+		if ( $this->addBradCrumbsEnabled ) {
+			$this->breadCrumbs[] = array(
+				'name' => $name,
+				'action' => $action,
+				'is_active' => $isActive
+			);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add Bread Crumb
+	 * @param $name
+	 * @param string $action
+	 * @param bool $isActive
+	 * @return $this
+	 */
+	public function addEndOfBreadCrumb($name, $action = '', $isActive = null) {
+
+		$this->addBreadCrumb($name, $action, $isActive);
+		$this->addBradCrumbsEnabled = false;
+
+		return $this;
+	}
+
+	/**
+	 * Get Bread Crumbs
+	 * @return array
+	 */
+	public function getBreadCrumbs() {
+		return $this->breadCrumbs;
 	}
 }

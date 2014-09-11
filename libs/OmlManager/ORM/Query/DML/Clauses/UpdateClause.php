@@ -71,15 +71,18 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 
 				$fields = $modelReader->getModelPropertiesTokens();
 				$statements = array();
+				$expressionObject = $this->expressionObject;
 
-				$fieldValues = array_map(function($field) use ($fields, $modelReader, &$statements) {
+				$fieldValues = array_map(function($field) use ($modelReader, &$statements, $expressionObject) {
 
-					if ( !isset($field['primary_key']) || empty($this->expressionObject)) {
+					if ( !isset($field['primary_key']) || empty($expressionObject)) {
 
 						$propertyValue = $modelReader->getValueByFieldName($field['field']);
-						$statements[':'.$field['field']] = $propertyValue;
 
-						return $field['field'] . '= :'.$field['field'];
+						if ( $propertyValue !== null ) {
+							$statements[':'.$field['field']] = $propertyValue;
+							return $field['field'] . '= :'.$field['field'];
+						}
 					}
 
 					return false;
@@ -96,7 +99,7 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 				else {
 
 					$this->_UPDATE = str_replace(array(self::TABLE_NAME, self::FIELD_AND_VALUES, self::STATEMENT),
-						array($tableName, implode(', ', $fieldValues), $modelReader->getModelPrimaryKey().'= :'.$modelReader->getModelPrimaryKey()), $this->_UPDATE);
+						array($tableName, implode(', ', array_filter($fieldValues)), $modelReader->getModelPrimaryKey().'= :'.$modelReader->getModelPrimaryKey()), $this->_UPDATE);
 				}
 
 				$result = SDBManagerConnections::getManager($modelReader->getModelDataDriverConfName())->getDriver()->execute($this->_UPDATE, $statements);

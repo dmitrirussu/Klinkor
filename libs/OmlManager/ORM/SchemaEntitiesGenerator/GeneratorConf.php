@@ -54,6 +54,7 @@ class GeneratorConf {
 	public static $_CLASS_EXTENDS = ' extends [EXTEND_PACKAGE]';
 	public static $_PRIVATE_VAR = "\n\tprivate $";
 	public static $_GET_METHOD = "\n\tpublic function get[FUNC_NAME]() {\n\n\t\treturn [CONTENT]\n\t}\n";
+	public static $_GET_STATIC_METHOD = "\n\tpublic static function get[FUNC_NAME]() {\n\n\t\treturn [CONTENT]\n\t}\n";
 	public static $_SET_METHOD = "\n\tpublic function set[FUNC_NAME](\$value) {\n\t\t[CONTENT]\n\n\t\treturn \$this;\n\t}\n";
 	public static $_OML_MANAGER_METHOD = "
 	/**

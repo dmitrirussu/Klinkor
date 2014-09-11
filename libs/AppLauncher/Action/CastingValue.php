@@ -15,6 +15,8 @@ class CastingValue {
 
 	const TYPE_INT = 'int';
 	const TYPE_STRING = 'string';
+	const TYPE_CHAR = 'char';
+	const TYPE_STR = 'str';
 	const TYPE_BOOLEAN = 'boolean';
 	const TYPE_NULL = 'null';
 	const TYPE_ARRAY = 'array';
@@ -33,6 +35,8 @@ class CastingValue {
 
 				break;
 			}
+			case self::TYPE_STR:
+			case self::TYPE_CHAR:
 			case self::TYPE_STRING: {
 
 				$this->value = (string)$this->value;
