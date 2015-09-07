@@ -38,7 +38,6 @@ class RegisterAppFacade {
 		$this->request = $request;
 		$this->rooting = $rooting;
 		try {
-
 			$this->requestInfo = $this->rooting->getInfoByUrl($this->request->get('page', 'char', 'default'));
 
 			$this->controller = $this->requestInfo['class'];
@@ -47,12 +46,10 @@ class RegisterAppFacade {
 		catch(RootingException $e) {
 
 			if (Launch::isDevEnvironment()) {
-
-				Request::session()->setVar('exception', serialize($e));
-				Request::redirect('/Error/Default');
+				Request::session()->setVar('exception', $e);
+				Request::redirect('Error/Default');
 			}
 			else {
-
 				Request::redirect('Error/Page404');
 			}
 		}
@@ -60,8 +57,8 @@ class RegisterAppFacade {
 
 			if ( Launch::isDevEnvironment() ) {
 
-				Request::session()->setVar('exception', serialize($e));
-				Request::redirect('/Error/Default');
+				Request::session()->setVar('exception', $e);
+				Request::redirect('Error/Default');
 			}
 			else {
 
@@ -131,6 +128,7 @@ class RegisterAppFacade {
 						$this->controller->getRequest()->session()->unsetVar('successMessage');
 
 						$this->displayLayoutTemplates($isProjectApp, $controllerProjectName);
+
 						break;
 					}
 					case 'hb':
@@ -173,13 +171,18 @@ class RegisterAppFacade {
 
 						$url = $this->response->getDisplay() || $this->response->getUrl();
 
-						if ( !filter_var($this->response->getDisplay(), FILTER_VALIDATE_URL) ) {
+						if ( !filter_var($this->response->getDisplay(), FILTER_VALIDATE_URL) || !filter_var($this->response->getUrl(), FILTER_VALIDATE_URL) ) {
 
-							$url = Rooting::url($this->response->getDisplay());
+							if ( $this->response->getDisplay() ) {
+								$url = Rooting::url($this->response->getDisplay());
+							}
+							else {
 
+								$url = Rooting::url($this->response->getUrl());
+							}
 						}
 
-						header('Location: ' . $url);
+						Request::redirect($url, $this->response->getIsHttps(), $this->response->getIsLocale());
 
 						break;
 					}
@@ -205,7 +208,11 @@ class RegisterAppFacade {
 	}
 
 	private function forceDownloadFile($controllerProjectName) {
-		$filePath = PATH_PUBLIC . $controllerProjectName . DIRECTORY_SEPARATOR . $this->response->getFileName();
+
+		$filePath = $this->response->getFileName();
+		if ( !file_exists($this->response->getFileName()) ) {
+			$filePath = PATH_PUBLIC . $controllerProjectName . DIRECTORY_SEPARATOR . $this->response->getFileName();
+		}
 
 		header("Pragma: public");
 		header("Expires: 0");
@@ -301,6 +308,10 @@ class RegisterAppFacade {
 		header('Content-Type: application/json');
 		if ( is_array($this->response->getDisplay()) ) {
 			$jsonString = json_encode($this->response->getDisplay());
+			echo($jsonString);
+		}
+		elseif ( is_array($this->response->getData()) ) {
+			$jsonString = json_encode($this->response->getData());
 			echo($jsonString);
 		}
 		else {

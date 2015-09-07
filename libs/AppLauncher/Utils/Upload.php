@@ -32,7 +32,7 @@ class Upload {
 			return true;
 		}
 
-		return (in_array($ext, self::$ALLOW_EXTENSION));
+		return (in_array(strtolower($ext), self::$ALLOW_EXTENSION));
 	}
 
 	/**
@@ -48,8 +48,9 @@ class Upload {
 		if ( $hasManyFiles ) {
 
 			foreach($files as $key => $file) {
-				if ($key === 'tmp_name') {
+				if ($key === 'tmp_name' && isset($file[0])) {
 					$fileTmpFiles = $file[0];
+
 					$i = 0;
 					foreach($fileTmpFiles as $idFile => $tmpFile) {
 						if ( empty($files['name'][0][$idFile]) ) {
@@ -59,6 +60,11 @@ class Upload {
 						$tmpFileName = $tmpFile;
 						$fileName = $files['name'][0][$idFile];
 						$fileInfo = pathinfo($fileName);
+
+						if ( !isset($fileInfo['extension']) ) {
+							throw new \Exception('Missing file!');
+						}
+
 						$ext = $fileInfo['extension'];
 
 						if ( $newFileName && !$i) {
@@ -84,6 +90,47 @@ class Upload {
 						$i++;
 					}
 				}
+				else if ($key === 'tmp_name') {
+
+					$fileTmpFiles = $file;
+					$i = 0;
+					foreach($fileTmpFiles as $idFile => $tmpFile) {
+						if ( empty($files['name'][$idFile]) ) {
+							continue;
+						}
+
+						$tmpFileName = $tmpFile;
+						$fileName = $files['name'][$idFile];
+						$fileInfo = pathinfo($fileName);
+						$ext = $fileInfo['extension'];
+
+						if ( $newFileName && !$i) {
+							$newFileNameInfo = pathinfo($newFileName);
+							if ( isset($newFileNameInfo['extension']) && !empty($newFileNameInfo['extension'])) {
+								$ext = $newFileNameInfo['extension'];
+								$fileName = $newFileName;
+							}
+							else {
+								$fileName = $newFileName.'.'.$ext;
+							}
+						}
+						$newFileName = $fileName;
+
+						//check is available
+						if ( !self::checkIsAllowedExtensions($ext) ) {
+							throw new \Exception('File extension is not available!');
+						}
+
+						if ( !is_dir($destinationPath) ) {
+							throw new \Exception('Missing upload directory! -> ' . $destinationPath);
+						}
+
+						if ($error = !move_uploaded_file($tmpFileName, $destinationPath.$fileName) ) {
+							return false;
+						}
+						$i++;
+					}
+				}
 			}
 
 			return true;
@@ -92,6 +139,11 @@ class Upload {
 
 			$fileName = $files['name'];
 			$fileInfo = pathinfo($files['name']);
+
+			if ( !isset($fileInfo['extension']) ) {
+				throw new \Exception('Missing File!');
+			}
+
 			$ext = $fileInfo['extension'];
 			if ( $newFileName ) {
 				$newFileNameInfo = pathinfo($newFileName);

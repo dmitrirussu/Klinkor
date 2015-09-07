@@ -86,9 +86,15 @@ class Rooting {
 
 		$langCode = self::$LANG_CODE . ':';
 		$key = $langCode . $classAndAction;
+		$separator = '/';
+		if ( defined('APP_FOLDER') ) {
+			if ( APP_FOLDER ) {
+				$separator = '/'.APP_FOLDER.'/';
+			}
+		}
 
 		if ( isset(self::$PARSED_URLS[$key]) ) {
-			return '/'.trim(self::$PARSED_URLS[$key], '/');
+			return $separator.trim(self::$PARSED_URLS[$key], '/');
 		}
 
 
@@ -104,7 +110,7 @@ class Rooting {
 					$action = '/'.str_replace('Action', '', $actionData[1]);
 				}
 
-				return '/'.str_replace('Controller', '', $actionData[0]). $action;
+				return $separator.str_replace('Controller', '', $actionData[0]). $action;
 			}
 
 			return $classAndAction;
@@ -131,7 +137,7 @@ class Rooting {
 					if (isset($urls[0]) && strcasecmp($urls[0], self::$LANG_CODE) === 0 &&
 						in_array($className, $details) && in_array($actionName, $details) ) {
 
-						return '/'.self::$PARSED_URLS[$key] = trim($urls[1], '/');
+						return $separator.self::$PARSED_URLS[$key] = trim($urls[1], '/');
 					}
 				}
 			}
@@ -150,7 +156,80 @@ class Rooting {
 		$appName = '/'.(strpos(self::getAppName(), $app[0]) !== false ? '' : $app[0]);
 		$className = '/'.(isset($app[1]) ? str_replace('Controller', '', $app[1]) : 'Default');
 
-		return '/'.trim($appName.$className.$action, '/');
+		return $separator.trim($appName.$className.$action, '/');
+	}
+
+	/**
+	 * @param $classAndAction
+	 * @throws RootingException
+	 * @return array|bool|mixed
+	 */
+	public static function urlRelative($classAndAction) {
+		$langCode = self::$LANG_CODE . ':';
+		$key = $langCode . $classAndAction;
+
+		if ( isset(self::$PARSED_URLS[$key]) ) {
+			return trim(self::$PARSED_URLS[$key], '/');
+		}
+
+
+		if ( strpos($classAndAction, ':') === false) {
+			if ( strpos($classAndAction, '->') !== false ) {
+				$actionData = explode('->', $classAndAction);
+				$action = null;
+
+				if ( strpos($classAndAction, 'defaultAction') === false) {
+
+					$action = '/'.str_replace('Action', '', $actionData[1]);
+				}
+
+				return str_replace('Controller', '', $actionData[0]). $action;
+			}
+
+			return $classAndAction;
+		}
+
+		$classActions = explode('->', $classAndAction);
+
+		if ( !$classActions ) {
+
+			return $classAndAction;
+		}
+
+		$data = self::getRootesIni();
+
+		list($className, $actionName) = $classActions;
+
+		if ( $data ) {
+			foreach($data AS $actions ) {
+
+				foreach($actions as $url => $urlDetails) {
+					$details = explode('->', $urlDetails['action']);
+					$urls = explode(':', $url);
+
+					if (isset($urls[0]) && strcasecmp($urls[0], self::$LANG_CODE) === 0 &&
+						in_array($className, $details) && in_array($actionName, $details) ) {
+
+						return self::$PARSED_URLS[$key] = trim($urls[1], '/');
+					}
+				}
+			}
+
+		}
+
+		$action = substr($actionName, 0, strlen($actionName) - strlen('Action'));
+		$action = ($action === 'default' ? '' : '/'.$action);
+		$app = explode('::', $className);
+
+		if ( !isset($app[0]) ) {
+
+			throw new RootingException('Missing Url = ' .$classAndAction);
+		}
+
+		$appName = '/'.(strpos(self::getAppName(), $app[0]) !== false ? '' : $app[0]);
+		$className = '/'.(isset($app[1]) ? str_replace('Controller', '', $app[1]) : 'Default');
+
+		return trim($appName.$className.$action, '/');
 	}
 
 	/**
@@ -185,7 +264,6 @@ class Rooting {
 		}
 
 		if ( !isset($data[0]) ) {
-
 			throw new RootingException('Not found controller url: ' . $url);
 		}
 
@@ -208,25 +286,30 @@ class Rooting {
 	 * @throws RootingException
 	 */
 	private static function getInfoFromParsedUrl($url) {
+		$url = rtrim($url, '/');
 		$urlInfo = explode('/', $url);
 
+
 		if ( count($urlInfo) > 0) {
-			$appName = ucfirst($urlInfo[0]).'App';
 			$className = (isset($urlInfo[1]) ? ucfirst($urlInfo[1]) : 'Default').'Controller';
 			$actionName = (isset($urlInfo[2]) ? $urlInfo[2] : 'default').'Action';
 
+			$appObjects = RegisterApp::instance()->getRegisteredApps();
+			array_push($appObjects, RegisterApp::instance()->getBaseApp());
+
+
+			$appName = (strpos(ucfirst($urlInfo[0]), 'App') !== false ? ucfirst($urlInfo[0]) : ucfirst($urlInfo[0]).'App');
 			$appClassName = $appName.'\\'.$appName;
+
 
 			if ( class_exists($appClassName) ) {
 				$appClassObject = new $appClassName();
 
 				//return this controller if is registered
-				if ( !in_array($appClassObject, RegisterApp::instance()->getRegisteredApps()) ) {
-
+				if ( !in_array($appClassObject, $appObjects) ) {
 					$appName = explode('\\', self::getAppName());
 					$appName = $appName[0];
 				}
-
 				$controllerName = $appName.'\Controllers\\'.$className;
 			}
 			elseif(class_exists('AppLauncher\\'.$appClassName)) {
@@ -242,7 +325,7 @@ class Rooting {
 
 				$controllerName = 'AppLauncher\\'.$appName.'\Controllers\\'.$className;
 			}
-			else {
+			elseif (count($urlInfo) > 1) {
 				$className = (isset($urlInfo[0]) ? ucfirst($urlInfo[0]) : 'Default').'Controller';
 				$actionName = (isset($urlInfo[1]) ? $urlInfo[1] : 'default').'Action';
 
@@ -251,9 +334,14 @@ class Rooting {
 
 				$controllerName = $appName.'\Controllers\\'.$className;
 			}
+			else {
+				$className = (isset($urlInfo[0]) ? ucfirst($urlInfo[0]) : 'Default').'Controller';
+				$appName = explode('\\', self::getAppName());
+				$appName = $appName[0];
+				$controllerName = $appName.'\Controllers\\'.$className;
+			}
 
 			if ( !class_exists($controllerName) ) {
-
 				throw new RootingException('This Controller does not exist CN-NAME: ' . $controllerName);
 			}
 
@@ -308,7 +396,6 @@ class Rooting {
 					self::$ALL_URLS[] = parse_ini_file($fullPath, true);
 				}
 				else {
-
 					throw new RootingException('Not found rooting actions file, in directory = ' . $fullPath);
 				}
 			}

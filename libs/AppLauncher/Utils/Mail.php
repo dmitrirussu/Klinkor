@@ -18,15 +18,38 @@ class Mail implements MailInterface {
 	private $mailer;
 	private $message;
 
-	public function __construct($extraParams = '-f%s') {
+	public function __construct($useSMTPConf = array(), $extraParams = '-f%s') {
 
-		$transport = new \Swift_MailTransport($extraParams);
+		if ( $useSMTPConf ) {
+			if ( !isset($useSMTPConf['host']) ) {
+				throw new \InvalidArgumentException('Missing SMTP HOST');
+			}
+
+			if ( !isset($useSMTPConf['port']) ) {
+				throw new \InvalidArgumentException('Missing SMTP PORT');
+			}
+
+			if ( !isset($useSMTPConf['password']) ) {
+				throw new \InvalidArgumentException('Missing SMTP PASSWORD');
+			}
+
+			if ( !isset($useSMTPConf['username']) ) {
+				throw new \InvalidArgumentException('Missing SMTP USERNAME');
+			}
+
+			$transport = \Swift_SmtpTransport::newInstance($useSMTPConf['host'], $useSMTPConf['port'])
+				->setUsername($useSMTPConf['username'])
+				->setPassword($useSMTPConf['password']);
+		}
+		else {
+			$transport = new \Swift_MailTransport($extraParams);
+		}
 		$this->mailer = new \Swift_Mailer($transport);
 		$this->message = new \Swift_Message();
 	}
 
 	public function setFrom($addresses, $name = null) {
-		$this->message->setSender($addresses, $name);
+		$this->message->setFrom($addresses, $name);
 
 		return $this;
 	}

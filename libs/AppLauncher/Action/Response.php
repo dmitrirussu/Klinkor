@@ -102,6 +102,37 @@ class Response {
 		return $this->responseData['url'];
 	}
 
+	/**
+	 * @return bool
+	 */
+	public function getIsHttps() {
+
+		return (isset($this->responseData['https']) ? $this->responseData['https'] : false);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getIsLocale() {
+
+		return (isset($this->responseData['locale']) ? $this->responseData['locale'] : true);
+	}
+
+
+	/**
+	 * @return mixed
+	 * @throws \AppLauncher\Exceptions\ResponseException
+	 */
+	public function getData() {
+
+		if( !isset($this->responseData['data']) ) {
+
+			throw new ResponseException('Action Response attribute [data] cannot be empty, ');
+		}
+
+		return $this->responseData['data'];
+	}
+
 
 	/**
 	 * @return array

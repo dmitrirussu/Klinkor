@@ -62,25 +62,65 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 	}
 
 	/**
-	 * @return DriverInterface
+	 * @param bool $fetchAssoc
+	 * @return bool|mixed
+	 * @throws \OmlManager\ORM\Models\ReaderException
 	 */
-	public function fetchOne() {
+	public function fetchOne($fetchAssoc = false) {
 		$this->limit(0, 1);
 
 		$modelCollection = new ModelCollection($this->getModelReader(),
 			SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
 				->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement()));
 
-		return $modelCollection->getCollection();
+		return $modelCollection->getCollection($fetchAssoc);
 	}
 
-	public function fetchAll() {
+	/**
+	 * @return bool|mixed
+	 * @throws \OmlManager\ORM\Models\ReaderException
+	 */
+	public function fetchAssocOne() {
+		$this->limit(0, 1);
+		try {
+			$modelCollection = new ModelCollection($this->getModelReader(),
+				SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
+					->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement()));
+		}
+		catch(Exception $e) {
+			throw $e;
+		}
+		return $modelCollection->getCollection(true);
+	}
+
+	/**
+	 * @param bool $fetchAssoc
+	 * @return bool|mixed
+	 * @throws \OmlManager\ORM\Models\ReaderException
+	 */
+	public function fetchAll($fetchAssoc = false) {
 
 		$modelCollection = new ModelCollection($this->getModelReader(),
 			SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
 				->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement()));
 
-		return $modelCollection->getCollections();
+		return $modelCollection->getCollections($fetchAssoc);
+	}
+
+
+	/**
+	 * @return bool|mixed
+	 * @throws \OmlManager\ORM\Models\ReaderException
+	 */
+	public function fetchAssocAll() {
+
+		$modelCollection = new ModelCollection(
+			$this->getModelReader(),
+			SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
+				->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement())
+		);
+
+		return $modelCollection->getCollections(true);
 	}
 
 	public function model($object, $alias = null) {
@@ -103,6 +143,12 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 		$this->_FROM .= $this->modelReader->getModelDataBaseName() .'.'. $this->modelReader->getModelTableName() . $tableAlias . $this->joinModel;
 
 		$this->joinModel = null;
+
+		if ( !is_object($this->expression) ) {
+			//Set Default Expression
+			$exp = new Expression('1=1');
+			$this->expression($exp);
+		}
 
 		return $this;
 	}
@@ -149,10 +195,10 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 	 * @return ClauseSelectInterface
 	 */
 	public function expression(ExpressionInterface $exp) {
-
+		$this->_WHERE = str_replace('1=1', '', $this->_WHERE);
 		$this->expression = $exp;
 
-		$exp->checkValuesTypeByModels($this->models);
+		$this->expression->checkValuesTypeByModels($this->models);
 
 		$this->_WHERE .= $exp->getExpression();
 

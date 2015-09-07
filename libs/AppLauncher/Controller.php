@@ -137,7 +137,7 @@ abstract class Controller implements AppControllerInterface {
 	 * @param $message
 	 */
 	public function addErrorMessage($message) {
-		$this->errorMessages[] = $message;
+		$this->errorMessages[] = (is_array($message) ? implode('<br />', $message) : $message);
 		$this->getRequest()->session()->setVar('errors', $this->errorMessages);
 	}
 
@@ -154,7 +154,7 @@ abstract class Controller implements AppControllerInterface {
 	 * @param $message
 	 */
 	public function addSuccessMessage($message) {
-		$this->successMessages[] = $message;
+		$this->successMessages[] = (is_array($message) ? implode('<br />', $message) : $message);
 		$this->getRequest()->session()->setVar('successMessage', $this->successMessages);
 	}
 

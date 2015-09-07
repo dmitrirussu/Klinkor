@@ -28,9 +28,14 @@ class ModelCollection {
 	}
 
 	/**
-	 * @return mixed
+	 * @param bool $fetchAssoc
+	 * @return bool|mixed
 	 */
-	public function getCollection() {
+	public function getCollection($fetchAssoc = false) {
+		if ( $fetchAssoc ) {
+			return $this->driver->fetchOne(\PDO::FETCH_ASSOC);
+		}
+
 		$refObject = new \ReflectionObject( $this->model );
 		$this->model = $this->driver->fetchOne($refObject->getName());
 
@@ -43,9 +48,14 @@ class ModelCollection {
 	}
 
 	/**
-	 * @return bool|array
+	 * @param bool $fetchAssoc
+	 * @return bool|mixed
 	 */
-	public function getCollections() {
+	public function getCollections($fetchAssoc = false) {
+		if ( $fetchAssoc ) {
+			return $this->driver->fetchAll(\PDO::FETCH_ASSOC);
+		}
+
 		$refObject = new \ReflectionObject( $this->model );
 
 		$this->model = $this->driver->fetchAll($refObject->getName());
@@ -58,6 +68,9 @@ class ModelCollection {
 		return $this->model;
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
 	public function updateCollection() {
 		$this->model = $this->driver->fetchAll('');
 

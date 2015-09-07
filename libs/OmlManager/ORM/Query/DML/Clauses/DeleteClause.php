@@ -36,9 +36,12 @@ class DeleteClause implements DMLClauseInterface {
 	public function models(array $models) {
 
 		$this->models = $models;
-		$this->modelsReader = array_map(function($model) use ($models) {
-			return new Reader($model);
-		}, $models);
+
+		if ( $models ) {
+			foreach($models AS $model) {
+				$this->modelsReader[] = new Reader($model);
+			}
+		}
 
 		return $this;
 	}

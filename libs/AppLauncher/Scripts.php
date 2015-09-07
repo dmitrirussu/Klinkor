@@ -50,6 +50,32 @@ class Scripts {
 		self::$JS_FILES[$fileName] = $fileName;
 	}
 
+	public static function unsetAllCSSFiles() {
+		self::$CSS_FILES = array();
+		return true;
+	}
+
+	public static function unsetAllJSFiles() {
+		self::$JS_FILES = array();
+		return true;
+	}
+
+	public static function unsetCSSFile($fileName) {
+		if ( isset(self::$CSS_FILES[$fileName]) ) {
+			unset(self::$CSS_FILES[$fileName]);
+			return true;
+		}
+		return false;
+	}
+
+	public static function unsetJSFile($fileName) {
+		if ( isset(self::$JS_FILES[$fileName]) ) {
+			unset(self::$JS_FILES[$fileName]);
+			return true;
+		}
+		return false;
+	}
+
 	public static function getCssFiles() {
 
 		return self::$CSS_FILES;
@@ -66,6 +92,7 @@ class Scripts {
 	public static function showJs() {
 		self::appDirectories(RegisterApp::instance()->getBaseApp(), $apps);
 		self::appDirectories(RegisterApp::instance()->getRegisteredApps(), $apps);
+
 
 		$jsScripts = '';
 		$apps[] = 'global';
@@ -85,11 +112,11 @@ class Scripts {
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if ( file_exists($fileNameRootDir) ) {
-							self::writeJs($jsScripts, $fileNameRoot);
+							self::writeJs($jsScripts, DOMAIN_RESOURCES.$fileNameRoot);
 						}
 
 						if ( file_exists($fileDir) ) {
-							self::writeJs($jsScripts, $fileName);
+							self::writeJs($jsScripts, DOMAIN_RESOURCES.$fileName);
 						}
 					}
 				}
@@ -122,11 +149,11 @@ class Scripts {
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if (file_exists($rootFileDir)) {
-							self::writeCss($cssLinks, $rootFileName);
+							self::writeCss($cssLinks, DOMAIN_RESOURCES.$rootFileName);
 						}
 
 						if (file_exists($fileDir)) {
-							self::writeCss($cssLinks, $fileName);
+							self::writeCss($cssLinks, DOMAIN_RESOURCES.$fileName);
 						}
 					}
 				}

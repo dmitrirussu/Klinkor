@@ -128,9 +128,21 @@ class Session {
 	public function getVar($name, $default = null) {
 
 		return (isset($_SESSION[$this->sessionName][$name]) ?
-			(is_object($_SESSION[$this->sessionName][$name]) ? unserialize($_SESSION[$this->sessionName][$name]) :
+			(@unserialize($_SESSION[$this->sessionName][$name]) !== false ? unserialize($_SESSION[$this->sessionName][$name]) :
 				$_SESSION[$this->sessionName][$name] ) :
 			$default);
+	}
+
+	/**
+	 * Get All session Vars
+	 * @return mixed|null
+	 */
+	public function getVars() {
+
+		return (isset($_SESSION[$this->sessionName]) ?
+			(@unserialize($_SESSION[$this->sessionName]) !== false ? unserialize($_SESSION[$this->sessionName]) :
+				$_SESSION[$this->sessionName] ) :
+			null);
 	}
 
 	/**

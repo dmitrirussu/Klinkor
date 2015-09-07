@@ -40,9 +40,12 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 	public function models(array $models) {
 
 		$this->models = $models;
-		$this->modelsReader = array_map(function($model) use ($models) {
-			return new Reader($model);
-		}, $models);
+
+		if ( $models ) {
+			foreach($models AS $model) {
+				$this->modelsReader[] = new Reader($model);
+			}
+		}
 
 		return $this;
 	}
@@ -73,22 +76,19 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 				$statements = array();
 				$expressionObject = $this->expressionObject;
 
-				$fieldValues = array_map(function($field) use ($modelReader, &$statements, $expressionObject) {
+				if ( $fields ) {
+					foreach($fields AS $field) {
+						if ( !isset($field['primary_key']) || empty($expressionObject)) {
 
-					if ( !isset($field['primary_key']) || empty($expressionObject)) {
+							$propertyValue = $modelReader->getValueByFieldName($field['field']);
 
-						$propertyValue = $modelReader->getValueByFieldName($field['field']);
-
-						if ( $propertyValue !== null ) {
-							$statements[':'.$field['field']] = $propertyValue;
-							return $field['field'] . '= :'.$field['field'];
+							if ( $propertyValue !== null ) {
+								$statements[':'.$field['field']] = $propertyValue;
+								$fieldValues[] = $field['field'] . '= :'.$field['field'];
+							}
 						}
 					}
-
-					return false;
-
-				}, $fields);
-
+				}
 
 				if ( $this->expressionObject ) {
 					$statements = array_merge($statements, $this->expressionObject->getPreparedStatement());

@@ -11,7 +11,9 @@ namespace OmlManager\ORM\Query\DML\Clauses;
 
 interface ClauseSelectInterface {
 	public function fetchOne();
+	public function fetchAssocOne();
 	public function fetchAll();
+	public function fetchAssocAll();
 
 	/**
 	 * @param $joinPrimaryForeignKey

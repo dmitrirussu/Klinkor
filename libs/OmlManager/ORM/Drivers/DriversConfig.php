@@ -50,7 +50,7 @@ class DriversConfig implements DriverConfigInterface {
 		self::$DBS_CONNECTIONS->default->db_name = 'test';
 		self::$DBS_CONNECTIONS->default->user = 'root';
 		self::$DBS_CONNECTIONS->default->password = '';
-		self::$DBS_CONNECTIONS->default->port = '';
+		self::$DBS_CONNECTIONS->default->port = '3306';
 
 		if ( file_exists(dirname(__DIR__) . self::DATABASE_CONF_FILE_PATH) ) {
 
@@ -60,11 +60,11 @@ class DriversConfig implements DriverConfigInterface {
 				foreach ($databasesConfig AS $dbName => $database) {
 					self::$DBS_CONNECTIONS->{$dbName} = new \stdClass();
 					self::$DBS_CONNECTIONS->{$dbName}->driver = (isset($database['driver']) ? $database['driver'] : self::DRIVER_PDO_MYSQL);
-					self::$DBS_CONNECTIONS->{$dbName}->host = (isset($database['host']) ? $database['host'] : '');
+					self::$DBS_CONNECTIONS->{$dbName}->host = (isset($database['host']) ? $database['host'] : 'localhost');
 					self::$DBS_CONNECTIONS->{$dbName}->db_name = (isset($database['db_name']) ? $database['db_name'] : '');
 					self::$DBS_CONNECTIONS->{$dbName}->user = (isset($database['user']) ? $database['user'] : '');
 					self::$DBS_CONNECTIONS->{$dbName}->password = (isset($database['password']) ? $database['password'] : '');
-					self::$DBS_CONNECTIONS->{$dbName}->port = (isset($database['port']) ? $database['port'] : '');
+					self::$DBS_CONNECTIONS->{$dbName}->port = (isset($database['port']) ? $database['port'] : '3306');
 				}
 			}
 		}

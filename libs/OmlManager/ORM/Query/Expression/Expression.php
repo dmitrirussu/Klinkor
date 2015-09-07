@@ -240,7 +240,6 @@ class Expression extends ExpressionInterface {
 	public function field($fieldName) {
 
 		$fieldArray = explode('.', $fieldName);
-
 		$this->fieldName = (isset($fieldArray[1]) ? $fieldArray[1] : $fieldArray[0]);
 
 		if ( isset($fieldArray[1]) ) {
@@ -278,9 +277,9 @@ class Expression extends ExpressionInterface {
 	 */
 	public function diff($value) {
 
-		$this->setFieldValue($value);
-
 		$this->expression .= self::$_DIFF . ':'. $this->alias.$this->fieldName;
+
+		$this->setFieldValue($value);
 
 		return $this;
 	}
@@ -485,7 +484,6 @@ class Expression extends ExpressionInterface {
 			$this->fieldsValues[$this->alias][$this->fieldName] = $value;
 		}
 		else {
-
 			$this->fieldsValues[$this->fieldName] = $value;
 		}
 
@@ -534,7 +532,8 @@ class Expression extends ExpressionInterface {
 
 				break;
 			}
-			case '<>': {
+			case '<>':
+			case '!=': {
 				$this->diff($value);
 
 				break;

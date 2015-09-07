@@ -24,12 +24,12 @@ interface OMLQueryManagerInterface {
 
 interface OMLQueryMangerOperationsInterface {
 
-	public function fetchByPk($value);
-	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array());
-	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array());
-	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array());
-	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array());
-	public function fetch(array $limit = array(), array $orderBy = array());
+	public function fetchByPk($value, $fetchAssoc = false);
+	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array(), $fetchAssoc = false);
+	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array(), $fetchAssoc = false);
+	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array(), $fetchAssoc = false);
+	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array(), $fetchAssoc = false);
+	public function fetch(array $limit = array(), array $orderBy = array(), $fetchAssoc = false);
 	public function flush();
 }
 

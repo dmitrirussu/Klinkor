@@ -67,14 +67,18 @@ class InsertClause implements DMLClauseInterface {
 				$properties = $modelReader->getModelProperties();
 
 				$statement = array();
-				$fields = array_map(function($field) use ($properties, $modelReader, &$statement, $key) {
 
-					if ( $modelReader->getValueByFieldName($field->name) !== null) {
-						$statement[':'.$field->name.'_'.$key] = $modelReader->getValueByFieldName($field->name);
-						return $field->name;
+				if ( $properties ) {
+					foreach($properties AS $field) {
+						if ( $modelReader->getValueByFieldName($field->name) !== null) {
+
+							$statement[':'.$field->name.'_'.$key] = $modelReader->getValueByFieldName($field->name);
+
+							$fields[] = $field->name;
+						}
 					}
-					return null;
-				}, $properties);
+				}
+
 				$statements = array_merge($statements, $statement);
 				$sqlStatement[] = '('.implode(', ', array_keys($statement)).')';
 

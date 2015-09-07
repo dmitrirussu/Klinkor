@@ -20,7 +20,7 @@ class User {
 	/**
 	 * @var bool
 	 */
-	private static $HASHED_PASSWORD = true;
+	private static $HASHED_PASSWORD = null;
 
 	/**
 	 * @param $hashedPassword
@@ -43,10 +43,10 @@ class User {
 	 */
 	public static function isLogged() {
 
-		$nickname = Request::session()->getVar('nickname', false);
+		$email = Request::session()->getVar('email', false);
 		$password = Request::session()->getVar('password', false);
 
-		if ( empty($nickname) || empty($password) ) {
+		if ( empty($email) || empty($password) ) {
 
 			return false;
 		}
@@ -56,19 +56,19 @@ class User {
 
 	/**
 	 * Login user by nickname and his Password
-	 * @param $nickname
+	 * @param $email
 	 * @param $password
 	 * @param $remember
 	 * @return bool
 	 */
-	public static function login($nickname, $password, $remember = false) {
+	public static function login($email, $password, $remember = false) {
 
-		if ( empty($nickname) || empty($password) || !Login::verify($password, self::getHashedPassword())) {
+		if ( empty($email) || empty($password) || !Login::verify($password, self::getHashedPassword())) {
 
 			return false;
 		}
 
-		Request::session()->setVar('nickname', $nickname);
+		Request::session()->setVar('email', $email);
 		Request::session()->setVar('password', $password);
 
 		//Set is Remember Life Time until 31 days

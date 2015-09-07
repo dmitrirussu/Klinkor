@@ -28,7 +28,7 @@ class Request {
 
 	public static function get($name, $type = 'null', $defaultValue = null) {
 
-		if ( !isset($_GET[$name]) ) {
+		if ( !isset($_GET[$name]) || $_GET[$name] === null ) {
 
 			$_GET[$name] = $defaultValue;
 		}
@@ -66,7 +66,7 @@ class Request {
 	}
 
 	public static function post($name, $type = 'null', $defaultValue = null) {
-		if ( !isset($_POST[$name]) ) {
+		if ( !isset($_POST[$name]) || $_POST[$name] === null ) {
 
 			$_POST[$name] = $defaultValue;
 		}
@@ -116,9 +116,16 @@ class Request {
 	 * Redirect
 	 * @param $url
 	 */
-	public static function redirect($url) {
+	public static function redirect($url, $https = false, $local = true) {
+		$hostName = '';
+		if ( $local ) {
+			$hostName = ($https ? 'https://' : 'http://') .$_SERVER['HTTP_HOST'].'/';
+			if ( APP_FOLDER ) {
+				$hostName = $hostName;
+			}
+		}
 
-		header('Location: '. $url);
+		header('Location: '. $hostName.ltrim($url, '/'));
 		exit;
 	}
 }

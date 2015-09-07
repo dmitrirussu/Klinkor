@@ -60,10 +60,9 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	public function connect() {
 
 		$dbName = ($this->config->getDataBaseName() ? "dbname={$this->config->getDataBaseName()}" : '');
-
-		$this->driver = new \PDO("{$this->driverName}:host={$this->config->getDataBaseHost()};{$dbName}",
+		$this->driver = new \PDO("{$this->driverName}:host={$this->config->getDataBaseHost()};port={$this->config->getDataBasePort()};{$dbName}",
 			$this->config->getDataBaseUser(),
-			$this->config->getDataBasePassword());
+		$this->config->getDataBasePassword());
 	}
 
 	public function getConnection() {
@@ -77,11 +76,17 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	}
 
 	public function fetchAll($object = 'stdClass') {
+		if ($object === \PDO::FETCH_ASSOC) {
+			return $this->queryResult->fetchAll(\PDO::FETCH_CLASS);
+		}
 
 		return (empty($this->queryResult) ? false :$this->queryResult->fetchAll(\PDO::FETCH_CLASS, $object));
 	}
 
 	public function fetchOne($object = 'stdClass') {
+		if ($object === \PDO::FETCH_ASSOC) {
+			return $this->queryResult->fetch(\PDO::FETCH_CLASS);
+		}
 
 		return (empty($this->queryResult) ? false : $this->queryResult->fetchObject($object));
 	}
@@ -92,7 +97,6 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	 * @return \PDOStatement
 	 */
 	public function execute($query, array $prepare) {
-
 		$this->queryResult = $this->driver->prepare( $query );
 		$this->queryResult->execute( $prepare );
 

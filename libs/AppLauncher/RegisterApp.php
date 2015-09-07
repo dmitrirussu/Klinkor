@@ -27,7 +27,6 @@ class RegisterApp implements RegisterAppInterface {
 	public static function instance() {
 
 		if ( empty(self::$INSTANCE) ) {
-
 			self::$INSTANCE = new self();
 		}
 
@@ -62,7 +61,15 @@ class RegisterApp implements RegisterAppInterface {
 	private function addAppRootingConfig(AppControllerInterface $app, $baseApp = false) {
 		$appReflection = new \ReflectionObject($app);
 
-		$fileInfo = pathinfo($appReflection->getFileName());
+		$fileInfo = array();
+		$includedFiles = get_included_files();
+
+		foreach($includedFiles AS $filePath) {
+			if ( strpos(str_replace('/', '\\',strtoupper($filePath)), strtoupper($appReflection->getName())) !== false && file_exists($filePath) ) {
+				$fileInfo = pathinfo($filePath);
+				break;
+			}
+		}
 
 		if ( !isset($fileInfo['dirname']) ) {
 

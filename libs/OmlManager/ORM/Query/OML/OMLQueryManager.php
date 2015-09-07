@@ -48,7 +48,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @return mixed
 	 * @throws OMLQueryManagerExceptions
 	 */
-	public function fetchByPk($id) {
+	public function fetchByPk($id, $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -65,7 +65,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$exp = new Expression();
 		$exp->field($reader->getModelPrimaryKey())->equal($id);
 
-		return OmlORManager::dml()->select()->model($this->model)->expression($exp)->fetchOne();
+		return OmlORManager::dml()->select()->model($this->model)->expression($exp)->fetchOne($fetchAssoc);
 	}
 
 	/**
@@ -76,7 +76,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array()) {
+	public function fetchOne($fieldName, $value, $operator = '=', array $orderBy = array(), $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -97,7 +97,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			$omlManagerRequest->orderBy($orderBy);
 		}
 
-		return $omlManagerRequest->fetchOne();
+		return $omlManagerRequest->fetchOne($fetchAssoc);
 	}
 
 	/**
@@ -109,7 +109,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array()) {
+	public function fetchAll($fieldName, $value, $operator = '=', array $limit = array(), array $orderBy = array(), $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -137,7 +137,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			$omeletteManager->limit($startOffset, $endOffset);
 		}
 
-		return $omeletteManager->fetchAll();
+		return $omeletteManager->fetchAll($fetchAssoc);
 	}
 
 	/**
@@ -146,7 +146,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array()) {
+	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array(), $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -156,7 +156,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		if ( $orderBy ) {
 			$omlMangerRequest->orderBy(array());
 		}
-		return $omlMangerRequest->fetchOne();
+		return $omlMangerRequest->fetchOne($fetchAssoc);
 	}
 
 	/**
@@ -165,7 +165,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array()) {
+	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array(), $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -186,7 +186,37 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			$omeletteManager->limit($startOffset, $endOffset);
 		}
 
-		return $omeletteManager->fetchAll();
+		return $omeletteManager->fetchAll($fetchAssoc);
+	}
+
+	/**
+	 * @param ExpressionInterface $exp
+	 * @param array $limit
+	 * @throws OMLQueryManagerExceptions
+	 * @return mixed
+	 */
+	public function fetchAssocAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array(), $fetchAssoc = false) {
+
+		if ( empty($this->model) ) {
+
+			throw new OMLQueryManagerExceptions('Model Cannot be empty');
+		}
+
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+
+		if ( $orderBy ) {
+			$omeletteManager->orderBy($orderBy);
+		}
+
+		if ( $limit ) {
+
+			$startOffset = (isset($limit[1]) ? $limit[0] : 0);
+			$endOffset = (!isset($limit[1]) ? $limit[0] : $limit[1]);
+
+			$omeletteManager->limit($startOffset, $endOffset);
+		}
+
+		return $omeletteManager->fetchAssocAll($fetchAssoc);
 	}
 
 	/**
@@ -195,7 +225,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws Exceptions\OMLQueryManagerExceptions
 	 * @return mixed
 	 */
-	public function fetch(array $limit = array(), array $orderBy = array()) {
+	public function fetch(array $limit = array(), array $orderBy = array(), $fetchAssoc = false) {
 
 		if ( empty($this->model) ) {
 
@@ -215,7 +245,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			$omeletteManager->limit($startOffset, $endOffset);
 		}
 
-		return $omeletteManager->fetchAll();
+		return $omeletteManager->fetchAll($fetchAssoc);
 	}
 
 	/**
@@ -286,7 +316,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @throws OMLQueryManagerExceptions
 	 * @return bool
 	 */
-	public function flush() {
+	public function flush($forceInsert = false) {
 
 		if ( empty($this->model) ) {
 
@@ -296,7 +326,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$modelReader = new Reader($this->model);
 
 		//insert new Model
-		if ( !$modelReader->getModelPrimaryKeyValue() ) {
+		if ( !$modelReader->getModelPrimaryKeyValue() && !$forceInsert) {
 
 			return OmlORManager::dml()->insert()->model($this->model)->flush();
 		}
@@ -327,7 +357,6 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 					//update Model
 					$result = OmlORManager::dml()->update()->model($model)->flush();
 				}
-
 
 				if ( empty($result) ) {
 
