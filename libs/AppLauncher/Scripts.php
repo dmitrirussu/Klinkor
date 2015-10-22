@@ -101,6 +101,7 @@ class Scripts {
 
 			$apps = array_reverse($apps);
 			$javascriptFiles = self::getScriptsJs();
+			$domain = (APP_FOLDER ? DOMAIN_RESOURCES : '');
 
 			foreach($apps as $app) {
 				if ( $javascriptFiles ) {
@@ -112,11 +113,11 @@ class Scripts {
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if ( file_exists($fileNameRootDir) ) {
-							self::writeJs($jsScripts, DOMAIN_RESOURCES.$fileNameRoot);
+							self::writeJs($jsScripts, $domain.$fileNameRoot);
 						}
 
 						if ( file_exists($fileDir) ) {
-							self::writeJs($jsScripts, DOMAIN_RESOURCES.$fileName);
+							self::writeJs($jsScripts, $domain.$fileName);
 						}
 					}
 				}
@@ -137,6 +138,7 @@ class Scripts {
 		if ( $apps ) {
 			$apps = array_reverse($apps);
 			$cssFiles = self::getCssFiles();
+			$domain = (APP_FOLDER ? DOMAIN_RESOURCES : '');
 
 			foreach($apps as $app) {
 
@@ -149,11 +151,11 @@ class Scripts {
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
 						if (file_exists($rootFileDir)) {
-							self::writeCss($cssLinks, DOMAIN_RESOURCES.$rootFileName);
+							self::writeCss($cssLinks, $domain.$rootFileName);
 						}
 
 						if (file_exists($fileDir)) {
-							self::writeCss($cssLinks, DOMAIN_RESOURCES.$fileName);
+							self::writeCss($cssLinks, $domain.$fileName);
 						}
 					}
 				}
