@@ -35,6 +35,11 @@ class Session {
 		$this->updateLastActivityTime();
 	}
 
+	public function setSessionName($name) {
+		$this->sessionName = $name;
+		return $this;
+	}
+
 
 	/**
 	 * Get Session Life Time
@@ -114,7 +119,7 @@ class Session {
 			throw new SessionException('Name of Var cannot be Empty');
 		}
 
-		$_SESSION[$this->sessionName][$name] = (is_object($value) ? serialize($value) : $value);
+		$_SESSION[$this->sessionName][$name] = (is_object($value) ? $value : $value);
 
 		return $this;
 	}

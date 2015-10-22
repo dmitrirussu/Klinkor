@@ -129,7 +129,9 @@ class Rooting {
 
 		if ( $data ) {
 			foreach($data AS $actions ) {
-
+				if ( empty($actions) ) {
+					continue;
+				}
 				foreach($actions as $url => $urlDetails) {
 					$details = explode('->', $urlDetails['action']);
 					$urls = explode(':', $url);
@@ -143,7 +145,6 @@ class Rooting {
 			}
 
 		}
-
 		$action = substr($actionName, 0, strlen($actionName) - strlen('Action'));
 		$action = ($action === 'default' ? '' : '/'.$action);
 		$app = explode('::', $className);
@@ -246,7 +247,6 @@ class Rooting {
 		if( !$data ) {
 
 			$result = self::getInfoFromParsedUrl($url);
-
 			if ( $result ) {
 
 				return $result;
@@ -269,7 +269,8 @@ class Rooting {
 
 		$appName = explode('::', $data[0]);
 		$controllerName = $appName[1];
-		$appName = explode('\\', self::getAppName());
+		//fixme
+//		$appName = explode('\\', self::getAppName());
 		$appName = $appName[0].'\\Controllers\\'.$controllerName;
 		$appControllerName = $appName;
 

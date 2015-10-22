@@ -48,6 +48,7 @@ class Expression extends ExpressionInterface {
 	private $inFieldSValues = array();
 
 	public function __construct($expression = null) {
+		$this->expression = null;
 		if ( $expression === '1=1') {
 
 			$this->expressions[] = $expression;
@@ -434,26 +435,19 @@ class Expression extends ExpressionInterface {
 	 * @return string
 	 */
 	public function getExpressionsDone() {
-
-		if ( empty($this->expressionsDone) && !empty($this->expressions) ) {
-
-			//set default expressions
-			$this->expressionsDone = $this->expressions;
-		}
-		elseif( $this->expressions ) {
-
-			//set end of expressions
-			$this->expressionsDone[] = implode($this->expressions);
+		if ( !empty($this->expressions) ) {
+			$this->expressions[] = $this->expression;
+			//set default expression
+			$expression = implode($this->expressions);
 		}
 		else {
 			//set simple wrote expression
-			$this->expressionsDone[] = $this->expression;
+			$expression = $this->expression;
 		}
 
-		$this->expression = null;
-
-		return implode($this->expressionsDone);
+		return $expression;
 	}
+
 
 	/*
 	 * return Expression

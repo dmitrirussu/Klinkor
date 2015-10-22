@@ -36,7 +36,7 @@ abstract class Controller implements AppControllerInterface {
 	/**
 	 * @return mixed|Response
 	 */
-	abstract public function defaultAction();
+	public function defaultAction() {}
 
 	/**
 	 * @return OmlORManager

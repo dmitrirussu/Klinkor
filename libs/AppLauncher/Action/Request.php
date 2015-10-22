@@ -12,6 +12,7 @@ namespace AppLauncher\Action;
 class Request {
 
 	private static $session;
+	private static $cookies;
 
 	public function __construct() {}
 	private function __clone() {}
@@ -85,16 +86,13 @@ class Request {
 		return $_FILES[$name];
 	}
 
-	public static function cookie($name, $type = 'null', $defaultValue = null) {
+	public static function cookie() {
 
-		if ( !isset($_COOKIE[$name]) ) {
-
-			$_COOKIE[$name] = $defaultValue;
+		if ( empty(self::$cookies) ) {
+			return self::$cookies = new Cookies();
 		}
 
-		$castingValue = new CastingValue($defaultValue, $type);
-
-		return $castingValue->getValue();
+		return self::$cookies;
 	}
 
 	/**
@@ -108,6 +106,7 @@ class Request {
 
 			self::$session = new Session($name);
 		}
+		self::$session->setSessionName($name);
 
 		return self::$session;
 	}

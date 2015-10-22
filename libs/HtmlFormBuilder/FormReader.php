@@ -13,20 +13,28 @@ use OmlManager\ORM\Models\Reader;
 
 class FormReader extends Reader implements FormReaderInterface {
 
-	public function setModelFieldsValues(array $fields) {
+	/**
+	 * @param $modelObject
+	 * @param array $formFieldsData
+	 * @throws \OmlManager\ORM\Models\ReaderException
+	 */
+	public function __construct($modelObject, $formFieldsData = array()) {
 
-		parent::setModelFieldsValues($fields);
+		parent::__construct($modelObject);
 
-		return $this;
+		if ( $formFieldsData ) {
+			$this->setModelFieldsValues($formFieldsData);
+		}
 	}
 
+	/**
+	 * @return mixed
+	 */
 	public function getModel() {
-
 		return parent::getModel();
 	}
 }
 
 interface FormReaderInterface {
-	public function setModelFieldsValues(array $fields);
 	public function getModel();
 }

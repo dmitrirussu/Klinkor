@@ -47,22 +47,20 @@ class RegisterAppFacade {
 
 			if (Launch::isDevEnvironment()) {
 				Request::session()->setVar('exception', $e);
-				Request::redirect('Error/Default');
+				Request::redirect(Rooting::url('ErrorApp::DefaultController->defaultAction'));
 			}
 			else {
-				Request::redirect('Error/Page404');
+				Request::redirect(Rooting::url('ErrorApp::Page404Controller->defaultAction'));
 			}
 		}
 		catch(\Exception $e) {
 
 			if ( Launch::isDevEnvironment() ) {
-
 				Request::session()->setVar('exception', $e);
-				Request::redirect('Error/Default');
+				Request::redirect(Rooting::url('ErrorApp::DefaultController->defaultAction'));
 			}
 			else {
-
-				Request::redirect('Error/Page404');
+				Request::redirect(Rooting::url('ErrorApp::Page404Controller->defaultAction'));
 			}
 		}
 	}
@@ -94,7 +92,7 @@ class RegisterAppFacade {
 						.'] does not exist');
 				}
 
-				$this->controller = new $this->controller();
+				$this->controller = new $this->controller(RegisterApp::instance()->getBaseApp()->getLangCode());
 
 				if ( !User::isLogged() && $this->controller->isSecured() ) {
 
@@ -197,7 +195,7 @@ class RegisterAppFacade {
 		catch(\Exception $e) {
 			if ( Launch::isDevEnvironment() ) {
 
-				Request::session()->setVar('exception', serialize($e));
+				Request::session()->setVar('exception', $e);
 				Request::redirect('/Error/Default');
 			}
 			else {

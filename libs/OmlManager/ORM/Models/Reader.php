@@ -39,14 +39,20 @@ class Reader implements ReaderInterface {
 
 		$this->model = $modelObject;
 
-		$this->reflectionModelClass = new \ReflectionClass($this->model);
+		$parentReflection = $this->reflectionModelClass = new \ReflectionClass($this->model);
 		$this->modelInfo = $this->readTokensFromDocComment($this->reflectionModelClass->getDocComment());
 
 		if ( !isset($this->reflectionModelClass->getParentClass()->name) ) {
 
 			throw new ReaderException('Missing parent class for Model ' . $this->reflectionModelClass->getName());
 		}
-		$parentClass = $this->reflectionModelClass->getParentClass()->name;
+
+		if( strpos($this->reflectionModelClass->getParentClass()->name, '\\Store\\') !== false) {
+			$parentReflection = new \ReflectionClass($this->reflectionModelClass->getParentClass()->name);
+		}
+
+		$parentClass = $parentReflection->getParentClass()->name;
+
 		$parentClass = new PackageReader(new $parentClass);
 
 		if ( empty($parentClass) ) {

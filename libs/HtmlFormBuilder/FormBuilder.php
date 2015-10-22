@@ -8,20 +8,38 @@
 
 namespace HtmlFormBuilder;
 
-
-use AppLauncher\FormValidator\FormValidator;
+use HtmlFormBuilder\Interfaces\IFormBuilder;
+use HtmlFormBuilder\Interfaces\IFormValidator;
 use OmlManager\ORM\Query\Types\ValueTypes;
+use HtmlFormBuilder\Translator\FormTranslations;
+use HtmlFormBuilder\Validator\FormValidator;
+use HtmlFormBuilder\Exceptions\FormBuilderException;
+use HtmlFormBuilder\Utils\FormBuilderUtils;
 
-class FormBuilder {
+class FormBuilder implements IFormBuilder {
 
 	private $errors = array();
 
 	private $usedFields = array();
 	private $unusedFields = array();
+	private $requiredFields = array();
 	private $FORMS_UNIFY = false;
 	private $MODELS = array();
+	private $modelObjects = array();
 	private $HTML = '';
 	private $simpleForm = false;
+	private $formObjects = '';
+
+	private $mainModelObject = array();
+	private $fieldsAppended = array();
+	private $fieldsClassName = array();
+	private $fieldsLabel = array();
+	private $fieldsType = array();
+
+	private $selectBoxData = array();
+
+	private $formContainerClass = null;
+	private $formAction = null;
 
 	/**
 	 * @var ModelFieldsReader
@@ -30,17 +48,34 @@ class FormBuilder {
 	private $fieldValue;
 
 	/**
+	 * @var FormValidator
+	 */
+	private $formValidator;
+
+	/**
 	 * @var \OmlManager\ORM\Models\Reader
 	 */
 	private $DEFAULT_MODEL;
 
+
+	private static $OPTION_PROTOTYPE = array(
+		'section_class' => 'col-md-6',
+		'action' => '',
+		'method' => 'post',
+		'fields' => array(),
+		'buttons' => array(
+			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
+			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
+		));
+
+
 	/**
-	 * @param null $model
+	 * @param null $mainModel
 	 * @param array $options
 	 * @param bool $simpleForm
 	 * @throws FormBuilderException
 	 */
-	public function __construct($model = null,
+	public function __construct($mainModel = null,
 								array $options = array(
 									'section_class' => 'col-md-6',
 									'action' => '',
@@ -51,42 +86,44 @@ class FormBuilder {
 										'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
 									)), $simpleForm = false) {
 
-		if ( empty($model) ) {
+		if ( empty($mainModel) ) {
 			throw new FormBuilderException('Model Cannot Be Empty');
 		}
 
 		$this->simpleForm = $simpleForm;
 
 		$this->HTML = null;
-		$this->MODELS = array();
+		$this->modelObjects[] = $this->mainModelObject = $mainModel;
+
 		$this->MODELS[] = $this->DEFAULT_MODEL = array(
-			'model' => $model,
-			'options' => $options
+			'model' => $mainModel,
+			'options' => (empty($options) ? self::$OPTION_PROTOTYPE : $options)
 		);
 	}
 
 	/**
-	 * Set Model
+	 * Add model to Form Builder
 	 * @param $model
 	 * @param array $options
-	 * @return $this
+	 * @return $this|mixed
 	 * @throws FormBuilderException
 	 */
-	public function setModel($model, array $options = array(
-								'section_class' => 'col-md-6',
-								'action' => '',
-								'method' => 'post',
-								'fields' => array(),
-								'buttons' => array(
-									'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
-									'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
-								))) {
+	public function addModel($model, array $options = array(
+		'section_class' => 'col-md-6',
+		'action' => '',
+		'method' => 'post',
+		'fields' => array(),
+		'buttons' => array(
+			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
+			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
+		))) {
 
 		if ( empty($model) ) {
 
 			throw new FormBuilderException('Form model param cannot be empty');
 		}
 
+		$this->modelObjects[] = $model;
 
 		$this->MODELS[] = array(
 			'model' => $model,
@@ -96,47 +133,193 @@ class FormBuilder {
 		return $this;
 	}
 
+
+	/**
+	 * @param $fieldName
+	 * @param string $value
+	 * @param string $appendAfterFieldName
+	 * @param null $modelObject
+	 * @return $this
+	 */
+	public function addField($fieldName, $value = '', $appendAfterFieldName = 'end' /*end|top|field_name*/, $modelObject = null) {
+		$this->fieldsAppended[$fieldName] = array(
+			'type' => 'varchar',
+			'field_name' => $fieldName,
+			'value' => $value,
+			'position' => $appendAfterFieldName,
+			'model' => $this->mainModelObject
+		);
+		return $this;
+	}
+
+	/**
+	 * @param $fieldName
+	 * @param string $fieldKey
+	 * @param array $fields
+	 * @param array $selectBoxData
+	 * @return $this
+	 */
+	public function addSelectBoxData($fieldName, $fieldKey = '', $fields = array(), $selectBoxData = array(), $selectedValues = array()) {
+		$this->selectBoxData[$fieldName] = array(
+			'key' => $fieldKey,//field Key On Option Value
+			'fields' => $fields, //Fields Name on The Option
+			'data' => $selectBoxData, //Select Box Option Name
+			'selected_values' => $selectedValues, //Select Box Option Name
+		);
+		return $this;
+	}
+
+	/**
+	 * @param $fieldName
+	 * @param $label
+	 * @return $this
+	 */
+	public function addFieldLabel($fieldName, $label) {
+
+		$this->fieldsLabel[$fieldName] = $label;
+
+		return $this;
+	}
+
+	/**
+	 * @param $fieldName
+	 * @param $className
+	 * @return $this
+	 */
+	public function addFieldClassName($fieldName, $className) {
+		$this->fieldsClassName[$fieldName] = $className;
+		return $this;
+	}
+
+	/**
+	 * This Method is designed to be changed Type of Field example from text to file
+	 * @param $fieldName
+	 * @param $type
+	 * @return $this
+	 */
+	public function addFieldType($fieldName, $type) {
+		$this->fieldsType[$fieldName] = $type;
+		return $this;
+	}
+
+	/**
+	 * Set Model is Deprecated
+	 * @param $model
+	 * @param array $options
+	 * @deprecated Can be used another method addModel($model, $options)
+	 * @return $this
+	 * @throws FormBuilderException
+	 */
+	public function setModel($model, array $options = array()) {
+		$this->addModel($model, $options);
+		return $this;
+	}
+
+
+	/**
+	 * Set Required Fields
+	 * @param $args
+	 * @return $this
+	 */
+	public function setRequiredFields($args) {
+		$this->requiredFields = $args;
+
+		if ( !is_array($args) ) {
+			$this->requiredFields = func_get_args();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get required Fields
+	 * @return array
+	 */
+	public function getRequiredFields() {
+		return $this->requiredFields;
+	}
+
+
 	/**
 	 * Set Used Fields
-	 * @param array $fields
+	 * @param array $fields OR strings, $arg1, $arg2, ...
 	 * @return $this
 	 */
-	public function setUsedFields(array $fields) {
+	public function setUsedFields($fields) {
 		$this->usedFields = $fields;
 
+		if ( !is_array($fields) ) {
+			$this->usedFields = func_get_args();
+		}
+
 		return $this;
 	}
 
 	/**
-	 * todo have to be implemented
+	 * Set UnUsed Fields
+	 * @param $args
+	 * @return $this|mixed
+	 */
+	public function setUnusedFields($args) {
+
+		$this->unusedFields = $args;
+
+		if ( !is_array($args) ) {
+			$this->unusedFields = func_get_args();
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Unset Unused Fields
-	 * @param array $fields
+	 * @deprecated Recommend for using setUnusedFields
+	 * @param $args
 	 * @return $this
 	 */
-	public function unsetUnusedFields(array $fields) {
+	public function unsetUnusedFields($args) {
 
-		$this->unusedFields = $fields;
-
-		return $this;
+		return $this->setUnusedFields($args);
 	}
+
 
 	/**
-	 * todo have to be developed Form Validator
+	 * @return IFormValidator
 	 */
-	public function validate() {
-		$formValidator = new FormValidator($this->MODELS);
+	public function validator() {
 
-		return $formValidator->isValid();
+		return new FormValidator($this->modelObjects, $this->getRequiredFields());
 	}
+
 
 	public function getForm() {
 		$this->buildForms();
 		return $this->HTML;
 	}
 
+
 	public function show() {
 		$this->buildForms();
 		return print($this->HTML);
+	}
+
+	/**
+	 * @param array      $array
+	 * @param int|string $position
+	 * @param mixed      $insert
+	 */
+	function arrayInsert(&$array, $position, $insert)
+	{
+		if (is_int($position)) {
+			array_splice($array, $position, 0, $insert);
+		} else {
+			$pos   = array_search($position, array_keys($array));
+			$array = array_merge(
+				array_slice($array, 0, $pos),
+				$insert,
+				array_slice($array, $pos)
+			);
+		}
 	}
 
 	/**
@@ -145,41 +328,93 @@ class FormBuilder {
 	 */
 	private function buildForms() {
 		$this->HTML = null;
+		$this->formObjects = null;
 
 		if ( empty($this->MODELS) ) {
 			throw new FormBuilderException('Form model param cannot be empty');
 		}
 
-		$macros = array(
-			FormObjects::MACROS_NAME,
-			FormObjects::MACROS_TYPE,
-			FormObjects::MACROS_VALUE,
-			FormObjects::MACROS_PLACEHOLDER,
-			FormObjects::MACROS_ATTRIBUTES,
-			FormObjects::MACROS_OPTIONS);
+		$lengthOfModels = count($this->MODELS);
 
-		$objects = null;
 		$i = 0;
 		foreach($this->MODELS as $model) {
 			$this->reader = new ModelFieldsReader($model['model']);
+			$properties = $this->reader->getModelPropertiesTokens();
 
+			if ( $model['model'] )
 
-			if ($properties = $this->reader->getModelPropertiesTokens() ) {
+			if ( $properties ) {
+				$propertiesAdd = $properties;
 
+				$a = 0;
+				foreach($propertiesAdd AS $property) {
+					foreach($this->fieldsAppended AS $field) {
+						if($field['position'] === $property['field'] && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, $a+1, array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
+						}
+						else if ($field['position'] === 'top' && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, 0, array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
+						}
+						else if ($field['position'] === 'end' && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, count($properties), array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
+						}
+					}
+					$a++;
+				}
+			}
+
+			if ($properties) {
 				foreach($properties as $property) {
-					$this->fieldValue = $this->reader->getValueByFieldName($property['field']);
+					if ( !isset($property['skip']) ) {
+						$this->fieldValue = htmlentities($this->reader->getValueByFieldName($property['field']));
+					}
+					else {
+						$this->fieldValue = $property['value'];
+					}
 
 					//skip fields which are not required or are primary key
 					if (in_array($property['field'], $this->unusedFields)) {
-
 						continue;
 					}
 
-					if ( !isset($property['type']) ) {
-						throw new FormBuilderException('Missing property type');
+					if ( $this->usedFields ) {
+						if ( !in_array($property['field'], $this->usedFields)) {
+							continue;
+						}
 					}
 
-					$propertyFieldName = $this->reader->getModelTableName().'['.$i.']['.$property['field'].']';
+					if ( !isset($property['type']) ) {
+						throw new FormBuilderException('Missing property type, fieldName: ' . $property['field']);
+					}
+
+					$propertyFieldName = $this->reader->getModelTableName().'['.$property['field'].']';
+					if ( $lengthOfModels > 1 ) {
+						$propertyFieldName = $this->reader->getModelTableName().'['.$i.']['.$property['field'].']';
+					}
 
 					if ( $this->simpleForm ) {
 
@@ -190,26 +425,31 @@ class FormBuilder {
 
 					//check exist property type inside of fields
 					$propertyType = (isset($options['fields'][$property['field']]['type']) ?
-											$options['fields'][$property['field']]['type'] : $property['type']);
+											$options['fields'][$property['field']]['type'] : (isset($this->fieldsType[$property['field']]) ?
+							$this->fieldsType[$property['field']] : $property['type']));
 
 					switch($propertyType) {
 						case FormObjectTypes::HIDDEN: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::HIDDEN);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::HIDDEN);
+							break;
+						}
+						case FormObjectTypes::PASSWORD: {
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::PASSWORD);
 							break;
 						}
 						case ValueTypes::VALUE_TYPE_TINYINT:
 						case ValueTypes::VALUE_TYPE_BIT:
 						case ValueTypes::VALUE_TYPE_BOOLEAN:
 						case ValueTypes::VALUE_TYPE_BOOL: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::CHECKBOX);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::CHECKBOX);
 
-						break;
+							break;
 						}
 						case ValueTypes::VALUE_TYPE_SMALLINT:
 						case ValueTypes::VALUE_TYPE_MEDIUMINT:
 						case ValueTypes::VALUE_TYPE_BIGINT:
 						case ValueTypes::VALUE_TYPE_INT: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::NUMBER);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::NUMBER);
 
 						break;
 						}
@@ -217,21 +457,21 @@ class FormBuilder {
 						case ValueTypes::VALUE_TYPE_DOUBLE:
 						case ValueTypes::VALUE_TYPE_REAL:
 						case ValueTypes::VALUE_TYPE_FLOAT: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::NUMBER);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::NUMBER);
 
 						break;
 						}
 						case FormObjectTypes::SELECT:
 						case ValueTypes::VALUE_TYPE_SET:
 						case ValueTypes::VALUE_TYPE_ENUM: {
-							$this->buildEnumSelectBox($model, $property, $propertyFieldName, $objects);
+							$this->buildEnumSelectBox($model, $property, $propertyFieldName);
 
 						break;
 						}
 						case FormObjectTypes::FILE:
 						case ValueTypes::VALUE_TYPE_BLOB:
 						case ValueTypes::VALUE_TYPE_LONGBLOB: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::FILE);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::FILE);
 
 						break;
 						}
@@ -239,26 +479,26 @@ class FormBuilder {
 						case ValueTypes::VALUE_TYPE_DATETIME:
 						case ValueTypes::VALUE_TYPE_DATE:
 						case ValueTypes::VALUE_TYPE_TIME: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::DATETIME);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::DATETIME);
 
 						break;
 						}
 						case ValueTypes::VALUE_TYPE_TEXT:
 						case ValueTypes::VALUE_TYPE_MEDIUMTEXT:
 						case ValueTypes::VALUE_TYPE_LONGTEXT: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects, FormObjectTypes::TEXTAREA);
+							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::TEXTAREA);
 
 						break;
 						}
 						case ValueTypes::VALUE_TYPE_STRING:
 						case ValueTypes::VALUE_TYPE_VARCHAR:
 						case ValueTypes::VALUE_TYPE_CHAR: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects);
+							$this->buildInputTextObject($model, $propertyFieldName, $property);
 
 						break;
 						}
 						default: {
-							$this->buildInputTextObject($macros, $model, $propertyFieldName, $property, $objects);
+							$this->buildInputTextObject($model, $propertyFieldName, $property);
 
 						break;
 						}
@@ -267,7 +507,7 @@ class FormBuilder {
 
 				if ( !$this->FORMS_UNIFY ) {
 
-					$this->buildForm($this->reader, $model, $objects);
+					$this->buildForm($this->reader, $model);
 				}
 			}
 			$i++;
@@ -275,107 +515,101 @@ class FormBuilder {
 
 		if ( $this->FORMS_UNIFY ) {
 
-			$this->buildForm(new ModelFieldsReader($this->DEFAULT_MODEL['model']), $this->DEFAULT_MODEL, $objects);
+			$this->buildForm(new ModelFieldsReader($this->DEFAULT_MODEL['model']), $this->DEFAULT_MODEL);
 		}
 	}
 
 	/**
-	 * @param $macros
 	 * @param $model
 	 * @param $propertyFieldName
 	 * @param $property
-	 * @param $objects
 	 * @param string $type
 	 */
-	private function buildInputTextObject($macros, $model, $propertyFieldName, $property, &$objects, $type = FormObjectTypes::TEXT) {
+	private function buildInputTextObject($model, $propertyFieldName, $property, $type = FormObjectTypes::TEXT) {
 		$object = null;
 		$classes = 'form-group';
-
-		$objectClassName = 'form-control';
-
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['class']) ) {
-			$objectClassName = $model['options']['fields'][$property['field']]['class'];
-		}
-
 		$attribute = null;
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['attribute']) ) {
-			$attribute = $model['options']['fields'][$property['field']]['attribute'];
+		$checked = null;
+		$objectClassName = 'form-control ' . (isset($property['field']) && isset($this->fieldsClassName[$property['field']]) ? $this->fieldsClassName[$property['field']] : '');
+		$fieldLabel = (isset($this->fieldsLabel[$property['field']]) ? $this->fieldsLabel[$property['field']] : $property['field']);
+		$fieldObjectOptions = (isset($model['options']['fields'][$property['field']]) ? $model['options']['fields'][$property['field']] : '');
+
+		if ( isset($property['field']) ) {
+
+			if ( isset($fieldObjectOptions['class'])) {
+				$objectClassName = $fieldObjectOptions['class'];
+			}
+
+			if ( isset($fieldObject['attribute']) ) {
+				$attribute = $fieldObjectOptions['attribute'];
+			}
+			if ( isset($fieldObjectOptions['attributes']) ) {
+				$attribute = $fieldObjectOptions['attributes'];
+			}
+
+			if ( isset($fieldObjectOptions['label']) ) {
+				$fieldLabel = $fieldObjectOptions['label'];
+			}
 		}
 
-		$fieldLabel = $property['field'];
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['label']) ) {
-			$fieldLabel = $model['options']['fields'][$property['field']]['label'];
-		}
 
 		switch($type) {
 			case FormObjectTypes::TEXT: {
-				$object = str_replace(
-						array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-						array(' for="'.$propertyFieldName.'"', FormTranslations::t('form', $fieldLabel)), FormObjects::LABEL) .
-					str_replace($macros,
-						array(
-							$propertyFieldName,
-							$type, $this->fieldValue, '', 'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute),
-						FormObjects::INPUT);
+				$object =
+				FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').
+				FormObjects::input(FormObjectTypes::TEXT, $propertyFieldName, $this->fieldValue,
+					'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
+
+				break;
+			}
+			case FormObjectTypes::PASSWORD: {
+				$object =
+				FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').
+				FormObjects::input(FormObjectTypes::PASSWORD, $propertyFieldName, $this->fieldValue,
+					'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
 
 				break;
 			}
 			case FormObjectTypes::CHECKBOX: {
-				$checked = '';
-				$value = '';//$this->fieldValue;
 				if ($this->fieldValue) {
-					$checked = 'checked="checked"';
+					$checked = FormObjects::CHECKED;
 				}
 
-				$object = str_replace(
-						array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-						array(' for="'.$property['field'].'"', str_replace($macros,
-							array(
-								$propertyFieldName,
-								$type, (string)$value, '', 'id="'.$propertyFieldName.'" ' . $checked . ' ' . $attribute),
-							FormObjects::INPUT) . FormTranslations::t('form', $fieldLabel)), FormObjects::LABEL);
+				$object = FormObjects::label(FormObjects::input($type, $propertyFieldName, $this->fieldValue,
+					'id="'.$propertyFieldName.'" ' . $checked . ' ' . $attribute).
+					FormTranslations::t('form', $fieldLabel), ' for="'.$property['field'].'"');
+
 				$classes = 'checkbox';
 				break;
 			}
 			case FormObjectTypes::TEXTAREA: {
-				$object .= str_replace(
-								array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-								array(' for="'.$propertyFieldName.'"', FormTranslations::t('form', $fieldLabel)), FormObjects::LABEL) .
-							str_replace($macros, array($propertyFieldName,
-								FormObjectTypes::TEXT, $this->fieldValue, '','class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'" ' . $attribute),
-							FormObjects::TEXTAREA);
+
+				$object .= FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"') .
+				FormObjects::textArea($propertyFieldName, $this->fieldValue, false,'class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'" ' . $attribute);
 
 				break;
 			}
 			default: {
-			$objectClassName = ($type === FormObjectTypes::FILE ? '' : $objectClassName);
-			$label = str_replace(
-				array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-				array(' for="'.$property['field'].'"', FormTranslations::t('form', $fieldLabel)), FormObjects::LABEL);
+				$objectClassName = ($type === FormObjectTypes::FILE ? '' : $objectClassName);
+				$label = FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$property['field'].'"');
 
-			if ( (isset($property['primary_key']) && $property['primary_key'] && isset($property['auto_increment']) && $property['auto_increment'] === 'true') || $type === FormObjectTypes::HIDDEN) {
-				$type = FormObjectTypes::HIDDEN;
-				$label = null;
-			}
+				if ( (isset($property['primary_key']) || isset($property['auto_increment']) ) || $type === FormObjectTypes::HIDDEN) {
 
-			$object =  $label.
-				str_replace($macros,
-					array(
-						$propertyFieldName,
-						$type, $this->fieldValue, '', 'class="'.$objectClassName.'" id="'.$property['field'].'"' . $attribute),
-					FormObjects::INPUT);
+					$type = FormObjectTypes::HIDDEN;
+					$label = null;
+				}
 
+				$input = FormObjects::input($type, $propertyFieldName, $this->fieldValue, 'class="'.$objectClassName.'" id="'.$property['field'].'"' . $attribute);
+
+				$object =  $label . $input;
 				break;
 			}
 		}
 
-		$objects .= str_replace(
-			array(
-				FormObjects::MACROS_ATTRIBUTES,
-				FormObjects::MACROS_FIELDS),
-			array('class="'.$classes.'"', $object),FormObjects::FIELDSET);
-
+		$this->formObjects .= FormObjects::fieldset($object, 'class="'.$classes.'"');
 	}
+
+
 
 	/**
 	 * Build Enum Select Box
@@ -384,119 +618,137 @@ class FormBuilder {
 	 * @param $propertyFieldName
 	 * @param $objects
 	 */
-	private function buildEnumSelectBox($model, $property, $propertyFieldName, &$objects) {
+	private function buildEnumSelectBox($model, $property, $propertyFieldName) {
 		$reader = new ModelFieldsReader($model['model']);
-		$optionFields = $model['options'];
+		$optionsResult = null;
+		$attribute = null;
+		$multiple = null;
 		$classes = 'form-group';
+		if ( isset($this->selectBoxData[$property['field']]) ) {
+			$fieldOptions = $this->selectBoxData[$property['field']];
+		} else {
+			$fieldOptions = (isset($model['options']['fields'][$property['field']]) ? $model['options']['fields'][$property['field']] : array());
+		}
+		$selectedValues = isset($fieldOptions['selected_values']) ? $fieldOptions['selected_values'] : array();
 
-		$optionsResult = str_replace(
-			array(FormObjects::MACROS_VALUE, FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-			array(FormTranslations::t('form', 'All'), '', FormTranslations::t('form', 'All')),
-			FormObjects::SELECT_OPTION);
 
-		$selectedValues = isset($optionFields['fields'][$property['field']]['selected_values']) ?
-								$optionFields['fields'][$property['field']]['selected_values'] : array();
+		$methodKey = (isset($fieldOptions['key']) ? $fieldOptions['key'] : $property['field']);
 
-		$methodKey = (isset($optionFields['fields'][$property['field']]['key']) ? $optionFields['fields'][$property['field']]['key'] : $property['field']);
-		$methodName = $this->getGetterMethod($methodKey);
 
 		//get Data from Enum
-		if ( !isset($optionFields['fields'][$property['field']]['type']) ) {
+		if ( !isset($fieldOptions['type']) && !isset($this->fieldsType[$property['field']])) {
 
-			$methodName .= 'List';
-			$options = $reader->getModel()->{$methodName}();
-
-			if ( $options ) {
-				foreach($options AS $option) {
-					$selected = '';
-					if ( $this->fieldValue == $option || $this->checkValueInArray($methodKey, $option, $selectedValues)) {
-						$selected = 'selected="selected"';
-					}
-
-					$optionsResult .= str_replace(
-						array(FormObjects::MACROS_VALUE, FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-						array($option, $selected, ucfirst($option)),
-						FormObjects::SELECT_OPTION);
-				}
-			}
+			$optionsResult = $this->generateOptionsFromEnum($methodKey, $selectedValues, $reader);
 		}
-		else {//Get Data from Select
-			$optionsData = isset($optionFields['fields'][$property['field']]['data']) ? $optionFields['fields'][$property['field']]['data'] : array();
+		else {
 
-			if ( $optionsData ) {
-				foreach($optionsData AS $value => $optionData) {
-					$optionDataKey = $optionData;
-					$isObject = false;
-					if ( is_object($optionData) ) {
+			$optionsResult = $this->generateOptionsFromObjectList($methodKey, $selectedValues, $fieldOptions);
+		}
 
-						$value = $optionData->{$methodName}();
-						if ( isset($optionFields['fields'][$property['field']]['fields']) && is_array($optionFields['fields'][$property['field']]['fields']) ) {
-							$resultFieldsData = array();
-							foreach($optionFields['fields'][$property['field']]['fields'] AS $fieldName ) {
-								$fieldMethodName = $this->getGetterMethod($fieldName);
+		if ( isset($this->fieldsLabel[$property['field']]) ) {
+			$fieldName = $this->fieldsLabel[$property['field']];
+		}
+		else {
+			$fieldName = (isset($fieldOptions['keyword']) ? $fieldOptions['keyword'] : $property['field']);
+		}
 
-								$resultFieldsData[] = FormTranslations::t('form', $optionData->{$fieldMethodName}());
-							}
-							$optionDataKey = implode('|', $resultFieldsData);
-						}
-						$isObject = true;
+		$objectClassName = 'form-control ';// . (isset($this->fieldsClassName[$property['field']]) ? $this->fieldsClassName[$property['field']] : '');
 
-						$selected = '';
-						if ( $this->fieldValue == $value || $this->checkValueInArray($methodKey, $value, $selectedValues)) {
-							$selected = 'selected="selected"';
-						}
-					}
-					else {
-						$selected = '';
-						if ( $this->fieldValue == $value ) {
-							$selected = 'selected="selected"';
-						}
-					}
+		if ( isset($property['field']) && isset($fieldOptions['class']) ) {
+			$objectClassName = $fieldOptions['class'];
+		}
 
 
-					$optionsResult .= str_replace(
-						array(FormObjects::MACROS_VALUE, FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-						array($value, $selected, ($isObject ? $optionDataKey : FormTranslations::t('form', $optionDataKey))),
-						FormObjects::SELECT_OPTION);
-				}
+		if ( isset($property['field']) ) {
+			if (isset($fieldOptions['attribute']) ) {
+				$attribute = $fieldOptions['attribute'];
 			}
 
+			if ( isset($fieldOptions['multiple']) ) {
+				$multiple = ' multiple="" ';
+				$propertyFieldName .= '[]';
+			}
 		}
 
-		$macros = array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_NAME, FormObjects::MACROS_OPTIONS);
+		$object = FormObjects::label(FormTranslations::t('form', $fieldName), ' for="'.$propertyFieldName.'"').
+			FormObjects::select($propertyFieldName, $optionsResult, 'class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'"' . ' ' . $attribute . $multiple);
 
-		$fieldName = (isset($optionFields['fields'][$property['field']]['keyword']) ? $optionFields['fields'][$property['field']]['keyword'] : $property['field']);
-
-		$objectClassName = 'form-control';
-
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['class']) ) {
-			$objectClassName = $model['options']['fields'][$property['field']]['class'];
-		}
-
-		$attribute = null;
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['attribute']) ) {
-			$attribute = $model['options']['fields'][$property['field']]['attribute'];
-		}
-		$multiple = null;
-		if ( isset($property['field']) && isset($model['options']['fields'][$property['field']]['multiple']) ) {
-			$multiple = ' multiple="" ';
-			$propertyFieldName .= '[]';
-		}
-
-		$object = str_replace(
-			array(FormObjects::MACROS_ATTRIBUTES, FormObjects::MACROS_TEXT),
-			array(' for="'.$propertyFieldName.'"', FormTranslations::t('form', $fieldName)), FormObjects::LABEL).
-			str_replace($macros,array('class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'"' . ' ' . $attribute . $multiple, $propertyFieldName, $optionsResult, ''),
-			FormObjects::SELECT);
-
-
-		$objects .= str_replace(
-			array(
-				FormObjects::MACROS_ATTRIBUTES,
-				FormObjects::MACROS_FIELDS),
-			array('class="'.$classes.'"', $object),FormObjects::FIELDSET);
+		$this->formObjects .= FormObjects::fieldset($object, 'class="'.$classes.'"');
 	}
 
+	/**
+	 * Generate Options From Model Enum List array
+	 * @param $methodKey
+	 * @param $selectedValues
+	 * @param ModelFieldsReader $reader
+	 * @return string
+	 */
+	private function generateOptionsFromEnum($methodKey, $selectedValues, ModelFieldsReader $reader) {
+		$optionsResult = '';
+		$methodName = FormBuilderUtils::getGetterMethod($methodKey).'List';
+		$options = $reader->getModel()->{$methodName}();
+
+		if ( $options ) {
+			foreach($options AS $option) {
+				$selected = '';
+				if ( $this->fieldValue == $option || $this->checkValueInArray($methodKey, $option, $selectedValues)) {
+					$selected = true;
+				}
+				$optionsResult .= FormObjects::option(ucfirst($option), $option, $selected);
+			}
+		}
+
+		return $optionsResult;
+	}
+
+
+	/**
+	 * @param $methodKey
+	 * @param $selectedValues
+	 * @param $optionFields
+	 * @return string
+	 */
+	private function generateOptionsFromObjectList($methodKey, $selectedValues, $optionFields) {
+		$optionsResult = '';
+		//Get Data from Select
+		$methodName = FormBuilderUtils::getGetterMethod($methodKey);
+		$optionsData = isset($optionFields['data']) ? $optionFields['data'] : array();
+
+		if ( $optionsData ) {
+			foreach($optionsData AS $value => $optionData) {
+				$optionDataKey = $optionData;
+				$isObject = false;
+				$selected = '';
+
+				if ( $this->fieldValue == $value && !is_object($optionData)) {
+					$selected = true;
+				}
+
+				if ( is_object($optionData) ) {
+
+					$value = $optionData->{$methodName}();
+					if ( isset($optionFields['fields']) && is_array($optionFields['fields']) ) {
+						$resultFieldsData = array();
+						foreach($optionFields['fields'] AS $fieldName ) {
+							$fieldMethodName = FormBuilderUtils::getGetterMethod($fieldName);
+
+							$resultFieldsData[] = FormTranslations::t('form', $optionData->{$fieldMethodName}());
+						}
+						$optionDataKey = implode('|', $resultFieldsData);
+					}
+					$isObject = true;
+
+					if ( $this->fieldValue == $value || $this->checkValueInArray($methodKey, $value, $selectedValues)) {
+						$selected = true;
+					}
+				}
+
+				$optionsResult .= FormObjects::option(($isObject ? $optionDataKey : FormTranslations::t('form', $optionDataKey)), $value, $selected);
+			}
+		}
+
+		return $optionsResult;
+	}
 
 	/**
 	 * Check Value In Array
@@ -512,7 +764,7 @@ class FormBuilder {
 				return in_array($value, $selectedValues);
 			}
 			else {
-				$methodName = $this->getGetterMethod($fieldName);
+				$methodName = FormBuilderUtils::getGetterMethod($fieldName);
 				foreach($selectedValues as $selectedObject) {
 					if ( $value === $selectedObject->{$methodName}()) {
 						return true;
@@ -524,107 +776,75 @@ class FormBuilder {
 		return false;
 	}
 
-	/**
-	 * Get Getter method
-	 * @param $fieldName
-	 * @return string
-	 */
-	private function getGetterMethod($fieldName) {
-		$methodName = 'get'.implode('',array_map(function($field){
-				return ucfirst($field);
-			}, explode('_', $fieldName)));
+	public function addFormContainerClassName($className) {
+		$this->formContainerClass = $className;
+	}
 
-		return $methodName;
+	public function addFormAction($action) {
+		$this->formAction = $action;
 	}
 
 	/**
-	 * Build an Form
+	 * Build Model Form
 	 * @param ModelFieldsReader $reader
 	 * @param $model
-	 * @param $objects
 	 */
-	public function buildForm(ModelFieldsReader $reader, $model, &$objects) {
+	private function buildForm(ModelFieldsReader $reader, $model) {
 
 		$action = (isset($model['options']['action']) ? $model['options']['action'] : null);
+		$action = ($this->formAction ? $this->formAction : $action);
 		$method = (isset($model['options']['method']) ? $model['options']['method'] : FormObjects::FORM_METHOD_POST);
+		if ( $this->formContainerClass ) {
+			$sectionClass = $this->formContainerClass;
+		}
+		else {
+			$sectionClass = (isset($model['options']['section_class']) ? $model['options']['section_class'] : 'col-md-6');
+		}
 
-		$form = str_replace(
-			array(
-				FormObjects::MACROS_ACTION,
-				FormObjects::MACROS_METHOD,
-				FormObjects::MACROS_NAME,
-				FormObjects::MACROS_ATTRIBUTES),
-			array($action,
-				$method,
-				$reader->getModelTableName(),
-				str_replace(FormObjects::MACROS_ID,
-					$reader->getModelTableName(),
-					FormObjects::ID_NAME)),
-			FormObjects::FORM);
+		$buttonObjects = $this->generateButtons($model, $reader);
 
+		$form = FormObjects::form($reader->getModelTableName(), $method, $this->formObjects . $buttonObjects, $action);
+		$this->HTML .= FormObjects::formContainer($form, $sectionClass);
+
+		$this->formObjects = null;
+	}
+
+	/**
+	 * Generate Buttons
+	 * @param $model
+	 * @param ModelFieldsReader $reader
+	 * @return null|string
+	 */
+	private function generateButtons($model, ModelFieldsReader $reader) {
 		$buttonObjects = null;
-
 		if (isset($model['options']['buttons'])) {
 
 			foreach($model['options']['buttons'] as $key => $button) {
+				$label = (isset($button['keyword']) ? $button['keyword'] : (isset($button['label']) ? $button['label'] : ''));
+				$name = (isset($button['name']) ? $button['name'] : $reader->getModelTableName());
 
 				if ( $key === 'submit' ) {
 
-					$buttonObjects .= str_replace(
-						array(
-							FormObjects::MACROS_NAME,
-							FormObjects::MACROS_TYPE,
-							FormObjects::MACROS_PLACEHOLDER,
-							FormObjects::MACROS_TEXT,
-							FormObjects::MACROS_ATTRIBUTES),
-						array(
-							$reader->getModelTableName().'_submit',
-							FormObjectTypes::SUBMIT, '', FormTranslations::t('form', $button['keyword']), 'class="btn btn-primary"'),
-						FormObjects::BUTTON);
+					$buttonObjects .= FormObjects::button($key, $name.'_submit',
+						FormTranslations::t('form', $label), 'class="btn btn-primary"');
 				}
 				elseif ( $key === 'reset' && isset($button['active']) && $button['active']) {
 
-					$buttonObjects .= str_replace(
-						array(
-							FormObjects::MACROS_NAME,
-							FormObjects::MACROS_TYPE,
-							FormObjects::MACROS_PLACEHOLDER,
-							FormObjects::MACROS_TEXT,
-							FormObjects::MACROS_ATTRIBUTES),
-						array(
-							$reader->getModelTableName().'_reset',
-							FormObjectTypes::RESET, '', FormTranslations::t('form', $button['keyword']), 'class="btn btn-default"'),
-						FormObjects::BUTTON);
+					$buttonObjects .= FormObjects::button($key, $name.'_reset',
+						FormTranslations::t('form', $label), 'class="btn btn-default"');
+
 				}
 				else {
-
 					$buttonType = (isset($button['type']) ? $button['type'] : FormObjectTypes::BUTTON);
 					$className = (isset($button['class']) ? $button['class'] : '');
 
-					$buttonObjects .= str_replace(
-						array(
-							FormObjects::MACROS_NAME,
-							FormObjects::MACROS_TYPE,
-							FormObjects::MACROS_PLACEHOLDER,
-							FormObjects::MACROS_TEXT,
-							FormObjects::MACROS_ATTRIBUTES),
-						array(
-							$reader->getModelTableName(),
-							$buttonType, '', FormTranslations::t('form', $button['keyword']), 'class="btn btn-primary '.$className.'"'),
-						FormObjects::BUTTON);
+					$buttonObjects .= FormObjects::button($buttonType, 'btn_'.$name,
+						FormTranslations::t('form', $label),  'class="btn btn-primary '.$className.'"');
 				}
 			}
-
 		}
 
-		$sectionClass = (isset($model['options']['section_class']) ? $model['options']['section_class'] : 'col-md-6');
-
-		$this->HTML .= str_replace(array(FormObjects::MACROS_FIELDS, FormObjects::MACROS_SECTION_CLASS), array($objects . $buttonObjects, $sectionClass), $form);
-		$objects = null;
-	}
-
-	public function getHTML() {
-		return $this->HTML;
+		return $buttonObjects;
 	}
 
 	/**

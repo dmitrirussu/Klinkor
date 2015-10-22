@@ -87,7 +87,7 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 				SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
 					->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement()));
 		}
-		catch(Exception $e) {
+		catch(\Exception $e) {
 			throw $e;
 		}
 		return $modelCollection->getCollection(true);
@@ -140,7 +140,7 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 		}
 		$this->joinModel = ($this->joinModel ? $this->_ON . $this->joinModel : $this->joinModel);
 
-		$this->_FROM .= $this->modelReader->getModelDataBaseName() .'.'. $this->modelReader->getModelTableName() . $tableAlias . $this->joinModel;
+		$this->_FROM .= "`{$this->modelReader->getModelDataBaseName()}`" .'.'. "`{$this->modelReader->getModelTableName()}`" . $tableAlias . $this->joinModel;
 
 		$this->joinModel = null;
 

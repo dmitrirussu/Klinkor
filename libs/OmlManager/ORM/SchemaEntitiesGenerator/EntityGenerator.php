@@ -83,19 +83,33 @@ class EntityGenerator extends Generator {
 		$namespace = GeneratorConf::$_NAMESPACE . $this->schemaNameSpace . $schemaName . "Package\\Model;\n";
 
 		//namespace use package
-		$namespace .= GeneratorConf::$_USE . $this->schemaNameSpace . $schemaName ."Package\\{$schemaName};";
+//		$namespace .= GeneratorConf::$_USE . $this->schemaNameSpace . $schemaName ."Package\\{$schemaName};";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\OmlORManager;";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\Drivers\\DriverTransactionInterface;
 ";
 
 		//Entity comment
-		$class = $namespace . str_replace(array(GeneratorConf::CLASS_NAME, GeneratorConf::TABLE_NAME),
-				array($className, $entityName), GeneratorConf::$_CLASS_DOC_COMMENT);
+		$class = $namespace . str_replace(
+				array(
+					GeneratorConf::CLASS_NAME,
+					GeneratorConf::TABLE_NAME
+				),
+				array(
+					$className,
+					$entityName
+				),
+				GeneratorConf::$_CLASS_DOC_COMMENT
+			);
 
 		//Entity Class Name
 		$class .= str_replace(
-			array(GeneratorConf::CLASS_NAME, GeneratorConf::CLASS_EXTENDS),
-			array($className, str_replace(GeneratorConf::EXTEND_PACKAGE, $schemaName, GeneratorConf::$_CLASS_EXTENDS)),
+			array(
+				GeneratorConf::CLASS_NAME,
+				GeneratorConf::CLASS_EXTENDS),
+			array(
+				$className,
+				str_replace(GeneratorConf::EXTEND_PACKAGE, '\\'.$this->schemaNameSpace . $schemaName ."Package\\Store\\{$className}", GeneratorConf::$_CLASS_EXTENDS)
+			),
 			GeneratorConf::$_CLASS);
 
 		//attributes and method Setters And Getters

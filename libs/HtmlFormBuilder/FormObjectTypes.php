@@ -23,6 +23,7 @@ class FormObjectTypes {
 	const DATETIME = 'datetime';
 	const DATETIME_LOCAL = 'datetime-local';
 	const HIDDEN = 'hidden';
+	const PASSWORD = 'password';
 	const EMAIL = 'email';
 	const URL = 'url';
 	const TEL = 'tel';

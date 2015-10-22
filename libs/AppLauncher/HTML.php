@@ -131,7 +131,6 @@ class HTML {
 				$$key = $value;
 			}
 		}
-
 		ob_start();
 
 		$templateDirectory = ($isMain ? '' : self::getAppPageName().DIRECTORY_SEPARATOR);
@@ -146,23 +145,24 @@ class HTML {
 			if ( file_exists($templateFile) ) {
 				$tplNotFound = true;
 
-				require_once $templateFile;
+				require $templateFile;
 			}
 			elseif(file_exists($templateInMainDirectory)) {
 				$tplNotFound = true;
 
-				require_once $templateInMainDirectory;
+				require $templateInMainDirectory;
 			}
 			elseif(file_exists($templateInMainLibsDirectory)) {
 				$tplNotFound = true;
 
-				require_once $templateInMainLibsDirectory;
+				require $templateInMainLibsDirectory;
 			}
 			elseif ( file_exists($templateLibsFile) ) {
 				$tplNotFound = true;
 
-				require_once $templateLibsFile;
+				require $templateLibsFile;
 			}
+
 		}
 		else {
 
@@ -177,25 +177,25 @@ class HTML {
 					if ( file_exists($templateFile) ) {
 						$tplNotFound = true;
 
-						require_once $templateFile;
+						require $templateFile;
 						break;
 					}
 					elseif(file_exists($templateInMainDirectory)) {
 						$tplNotFound = true;
 
-						require_once $templateInMainDirectory;
+						require $templateInMainDirectory;
 						break;
 					}
 					elseif(file_exists($templateInMainLibsDirectory)) {
 						$tplNotFound = true;
 
-						require_once $templateInMainLibsDirectory;
+						require $templateInMainLibsDirectory;
 						break;
 					}
 					elseif ( file_exists($templateLibsFile) ) {
 						$tplNotFound = true;
 
-						require_once $templateLibsFile;
+						require $templateLibsFile;
 						break;
 					}
 				}

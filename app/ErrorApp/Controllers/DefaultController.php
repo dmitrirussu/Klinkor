@@ -12,10 +12,16 @@ class DefaultController extends ErrorApp {
 		/**
 		 * @var $exception \Exception
 		 */
-		$exception = unserialize($this->getRequest()->session()->getVar('exception'));
+		$exception = $this->getRequest()->session()->getVar('exception');
 
-		$this->assign('exceptionMessage', $exception->getMessage());
-		$this->assign('exceptionTrace', $exception->getTrace());
+		if ( $exception ) {
+			$this->assign('exceptionMessage', $exception->getMessage());
+			$this->assign('exceptionTrace', $exception->getTrace());
+		}
+		else {
+			$this->assign('exceptionMessage', 'Missing Controller');
+			$this->assign('exceptionTrace', array());
+		}
 
 		return parent::defaultAction();
 	}

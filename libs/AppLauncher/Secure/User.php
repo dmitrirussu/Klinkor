@@ -84,6 +84,6 @@ class User {
 	 */
 	public static function logout() {
 
-		Request::session()->destroy();
+		Request::session()->destroyAll();
 	}
 } 

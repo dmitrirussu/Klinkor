@@ -84,7 +84,7 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 
 							if ( $propertyValue !== null ) {
 								$statements[':'.$field['field']] = $propertyValue;
-								$fieldValues[] = $field['field'] . '= :'.$field['field'];
+								$fieldValues[] = "`{$field['field']}`" . '= :'.$field['field'];
 							}
 						}
 					}
@@ -97,10 +97,16 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 						array($tableName, implode(', ', array_filter($fieldValues)), $this->_STATEMENT), $this->_UPDATE);
 				}
 				else {
-
 					$this->_UPDATE = str_replace(array(self::TABLE_NAME, self::FIELD_AND_VALUES, self::STATEMENT),
 						array($tableName, implode(', ', array_filter($fieldValues)), $modelReader->getModelPrimaryKey().'= :'.$modelReader->getModelPrimaryKey()), $this->_UPDATE);
 				}
+
+//				var_dump($this->_UPDATE);
+//				echo '<pre>';
+//				print_r($statements);
+//				echo '</pre>';
+//
+//				die;
 
 				$result = SDBManagerConnections::getManager($modelReader->getModelDataDriverConfName())->getDriver()->execute($this->_UPDATE, $statements);
 

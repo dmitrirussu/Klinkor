@@ -61,8 +61,10 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 
 		$dbName = ($this->config->getDataBaseName() ? "dbname={$this->config->getDataBaseName()}" : '');
 		$this->driver = new \PDO("{$this->driverName}:host={$this->config->getDataBaseHost()};port={$this->config->getDataBasePort()};{$dbName}",
-			$this->config->getDataBaseUser(),
+		$this->config->getDataBaseUser(),
 		$this->config->getDataBasePassword());
+
+		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	}
 
 	public function getConnection() {
@@ -114,7 +116,6 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 
 	public function beginTransaction() {
 
-		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, false);
 
 		return $this->driver->beginTransaction();
@@ -123,7 +124,6 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	public function commitTransaction() {
 		$result = $this->driver->commit();
 
-		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
 
 		return $result;
@@ -132,7 +132,6 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	public function rollbackTransaction() {
 		$result = $this->driver->rollBack();
 
-		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
 
 		return $result;

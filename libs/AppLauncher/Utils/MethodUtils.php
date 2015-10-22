@@ -43,6 +43,10 @@ class MethodUtils {
 		return $date->format($dateFormat);
 	}
 
+	public static function numberFormat($number, $dec = 2) {
+		return number_format($number, $dec);
+	}
+
 
 	/**
 	 * Pagination method
@@ -121,11 +125,78 @@ class MethodUtils {
 		}
 	}
 
+	/**
+	 *
+	 * @param $s
+	 * @param $macros
+	 * @return mixed
+	 */
+	public static function macrosReplace($s, $macros) {
+		foreach ($macros as $key => $value) {
+			$key = strtoupper($key);
+			$s = str_replace("[$key]", $value, $s);
+		}
+		return $s;
+	}
+
+	/**
+	 * Time Stamp to Mysql DateTime
+	 * @param $strTime
+	 * @return bool|string
+	 */
+	public static function timestampToMySqlDateTime($strTime){
+		if ( empty($strTime) ) {
+			return false;
+		}
+
+		return date('Y-m-d H:i:s', $strTime);
+	}
+
 	public static function encodeId($id) {
 		return 'CT'.base_convert($id, 10, 36);
 	}
 
 	public static function decodeId($id) {
 		return base_convert(substr($id, 2), 36, 10);
+	}
+
+	public static function checkNumber($faxNumber){
+		return preg_match('/^\+[0-9]{5,}$/', $faxNumber);
+	}
+
+	/**
+	 * Download File
+	 * @param $fileName
+	 * @return bool
+	 */
+	public static function downloadFile($fileName, $exportFileName = '') {
+
+		if ( empty($fileName) ) {
+			return false;
+		}
+
+		header("Pragma: public");
+		header("Expires: 0");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: public");
+		header("Content-Description: File Transfer");
+		header("Content-type: application/octet-stream");
+		header("Content-Disposition: attachment; filename=\"".($exportFileName ? $exportFileName : basename($fileName))."\"");
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Length: ".filesize($fileName));
+		@readfile($fileName);
+		exit;
+	}
+
+	/**
+	 * Strip Tags
+	 * @param $text
+	 * @return string
+	 */
+	public static function strip_tags($text) {
+
+		$text = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/i",'<$1$2>', $text);
+
+		return strip_tags($text);
 	}
 } 

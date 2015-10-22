@@ -154,7 +154,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		}
 		$omlMangerRequest = OmlORManager::dml()->select()->model($this->model)->expression($exp);
 		if ( $orderBy ) {
-			$omlMangerRequest->orderBy(array());
+			$omlMangerRequest->orderBy($orderBy);
 		}
 		return $omlMangerRequest->fetchOne($fetchAssoc);
 	}

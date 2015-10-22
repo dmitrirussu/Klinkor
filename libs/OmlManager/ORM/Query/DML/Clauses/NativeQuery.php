@@ -54,12 +54,12 @@ class NativeQuery {
 
 	public function fetchAll() {
 
-		return $this->driver->fetchAll(get_class($this->model));
+		return $this->driver->fetchAll(\PDO::FETCH_CLASS, get_class($this->model));
 	}
 
 	public function fetchOne() {
 
-		return $this->driver->fetchObject(get_class($this->model));
+		return $this->driver->fetchObject(\PDO::FETCH_CLASS, get_class($this->model));
 	}
 
 	public function fetchAssoc() {
