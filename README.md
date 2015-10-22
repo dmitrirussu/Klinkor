@@ -72,21 +72,24 @@ What is PHP AppLauncher?
 	public function defaultAction() {
 
 		return array(
-			'display' => 'index', 'type' => 'html'
+			'type' => 'html',
+			'display' => 'index'
 		);
 	}
 
 	public function countriesAction() {
 
 		return array(
-			'display' => 'countries', 'type' => 'html_block'
+			'type' => 'html_block',
+			'display' => 'countries'
 		);
 	}
 
 	public function anOtherAction() {
 
 		return array(
-			'display' => 'DemoApp::DefaultController->defaultAction', 'type' => 'redirect'
+			'type' => 'redirect',
+			'url' => 'DemoApp::DefaultController->defaultAction'
 		);
 	}
 
