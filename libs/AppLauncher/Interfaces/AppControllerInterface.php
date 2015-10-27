@@ -8,6 +8,7 @@
 namespace AppLauncher\Interfaces;
 
 
+use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
 
 interface AppControllerInterface {
@@ -17,12 +18,19 @@ interface AppControllerInterface {
 	 */
 	public function defaultAction();
 	public function getDBManager();
+
+	/**
+	 * @return Request
+	 */
 	public function getRequest();
 
 	/**
 	 * @return AppControllerInterface
 	 */
 	public function isSecured();
+	public function isLogged();
+	public function login($email, $password, $hashedPassword, $remember = false);
+	public function logout();
 	public function getLangCode();
 	public function getAssignedVars();
 	public function getAssignedJavaScriptFiles();

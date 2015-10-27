@@ -66,6 +66,7 @@ class RegisterAppFacade {
 	}
 
 	public function display() {
+
 		try {
 
 			if ( $this->controller ) {
@@ -87,15 +88,12 @@ class RegisterAppFacade {
 				//check if class has method
 				if ( !$reflectionControllerClass->hasMethod($this->action) ) {
 
-					throw new RegisterAppFacadeException('Controller ['. $this->controller
-						.'], Action method ['. $this->action
-						.'] does not exist');
+					throw new RegisterAppFacadeException("Controller [{$this->controller}] Action method [{$this->action}] does not exist");
 				}
 
 				$this->controller = new $this->controller(RegisterApp::instance()->getBaseApp()->getLangCode());
 
-				if ( !User::isLogged() && $this->controller->isSecured() ) {
-
+				if ( !$this->controller->isLogged() && $this->controller->isSecured() ) {
 					Request::redirect(Rooting::url('DefaultController->defaultAction'));
 				}
 
@@ -105,12 +103,10 @@ class RegisterAppFacade {
 				$this->response = $this->controller->{$this->action}();
 
 				if( empty($this->response)) {
-
-					throw new RegisterAppFacadeException('Missing Action Response AC-NAME: ' . $this->action);
+					throw new RegisterAppFacadeException("Missing Action Response AC-NAME: {$this->action}");
 				}
 
 				if ( is_array($this->response) ) {
-
 					$this->response = new Response($this->response);
 				}
 				

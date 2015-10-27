@@ -10,6 +10,7 @@ namespace AppLauncher;
 use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
 use AppLauncher\Interfaces\AppControllerInterface;
+use AppLauncher\Secure\Login;
 use OmlManager\ORM\OmlORManager;
 
 abstract class Controller implements AppControllerInterface {
@@ -80,6 +81,50 @@ abstract class Controller implements AppControllerInterface {
 		$this->assignedTemplateVars[$varName] = $value;
 
 		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isLogged() {
+
+		$email = Request::session()->getVar('email', false);
+		$password = Request::session()->getVar('password', false);
+
+		if ( empty($email) || empty($password) ) {
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Login user by nickname and his Password
+	 * @param $email
+	 * @param $password
+	 * @param $remember
+	 * @return bool
+	 */
+	public function login($email, $password, $hashedPassword, $remember = false) {
+
+		if ( empty($email) || empty($password) || !Login::verify($password, $hashedPassword)) {
+			return false;
+		}
+
+		$this->getRequest()->session()->setVar('email', $email);
+		$this->getRequest()->session()->setVar('password', $password);
+
+		//Set is Remember Life Time until 31 days
+		if ( $remember ) {
+			$this->getRequest()->session()->setSessionLifeTime((3600 * 24) * 31);
+		}
+
+		return true;
+	}
+
+	public function logout() {
+		return $this->getRequest()->session()->destroyAll();
 	}
 
 	/**
