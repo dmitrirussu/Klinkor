@@ -56,7 +56,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_BOOLEAN:
 				case ValueTypes::VALUE_TYPE_BOOL: {
 
-					if ( !is_bool($this->value) ) {
+					if ( !is_bool($this->value) && !is_null($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be boolean');
 					}
@@ -71,7 +71,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_TINYINT:
 				case ValueTypes::VALUE_TYPE_INT: {
 
-					if ( !is_int($this->value) && !is_bool($this->value) ) {
+					if ( !is_int($this->value) && !is_bool($this->value) && !is_null($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be integer');
 					}
@@ -85,7 +85,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_REAL:
 				case ValueTypes::VALUE_TYPE_FLOAT: {
 
-					if ( !is_float($this->value) ) {
+					if ( !is_float($this->value) && !is_null($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be float');
 					}
@@ -96,18 +96,17 @@ class ValueTypeValidator implements ValueTypeInterface {
 				}
 				case ValueTypes::VALUE_TYPE_NULL: {
 
-					if ( !is_null($this->value) ) {
-
+					if ( !is_null($this->value) && !empty($this->value) ) {
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be null');
 					}
 
-					$this->value = 'NULL';
+					$this->value = '';
 
 					break;
 				}
 				case ValueTypes::VALUE_TYPE_EMPTY: {
 
-					if ( !empty($this->value) ) {
+					if ( !empty($this->value) && !is_null($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be EMPTY');
 					}
@@ -130,7 +129,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_VARCHAR:
 				case ValueTypes::VALUE_TYPE_CHAR: {
 
-					if ( !is_string($this->value) ) {
+					if ( !is_string($this->value) && !is_null($this->value) ) {
 
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be string');
 					}
