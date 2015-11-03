@@ -36,7 +36,7 @@ class MethodUtils {
 	 */
 	public static function dateFormat($strTime = null, $dateFormat = 'm-d-Y') {
 		if ( empty($strTime) ) {
-			$strTime = time();
+			$strTime = 'now';
 		}
 
 		$date = new \DateTime($strTime);
