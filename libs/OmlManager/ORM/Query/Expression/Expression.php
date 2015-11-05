@@ -3,7 +3,7 @@
  * Created by Dmitri Russu. <dmitri.russu@gmail.com>
  * Date: 16.04.2014
  * Time: 18:54
- * ${NAMESPACE}${NAME} 
+ * ${NAMESPACE}${NAME}
  */
 
 namespace OmlManager\ORM\Query\Expression;
@@ -17,6 +17,7 @@ class Expression extends ExpressionInterface {
 	private static $_GROUPED = ' (EXP) ';
 
 	private static $_IS = ' IS ';
+	private static $_IS_NOT = ' IS NOT ';
 	private static $_NOT = ' NOT ';
 	private static $_IN = ' IN (VALUES) ';
 	private static $_LIKE = ' LIKE ';
@@ -60,85 +61,106 @@ class Expression extends ExpressionInterface {
 	 * @throws ExpressionException
 	 */
 	public function checkValuesTypeByModels(array $models) {
+		$modelProperties = array();
 
-		if ( empty($models) ) {
-
-			throw new ExpressionException('Missing DataBase model');
-		}
-
-		$this->finalExpression = $this->getExpressionsDone();
-
-		if ( isset($models[0]) ) {
-			$models = end($models);
-
-			/**
-			 * @var $models Reader
-			 */
-			$models = $models->getModelPropertiesTokens();
-		}
-
-
-		foreach($models AS $alias => $modelFields) {
-			$fieldMacros = null;
-
-			/**
-			 * @var $modelFields Reader
-			 */
-
-			if ( is_string($alias) ) {
-				$modelFields = $modelFields->getModelPropertiesTokens();
-
-				foreach($modelFields as $property) {
-
-					if ( !isset($this->fieldsValues[$alias]) || !array_key_exists($property['field'], $this->fieldsValues[$alias]) ) {
-						continue;
-					}
-
-					$type = $property['type'];
-					$value = $this->fieldsValues[$alias][$property['field']];
-
-					$valueType = new ValueTypeValidator($value, $type, $property['field']);
-
-					if ( is_array($valueType->getValue()) ) {
-
-						$i = 1;
-						foreach($valueType->getValue() AS $v ) {
-
-							$this->prepareStatement[':'.$alias.$property['field'].'_'.$i] = $v;
-
-							$i++;
-						}
-					}
-					else {
-
-						$this->prepareStatement[':'.$alias.$property['field']] = $valueType->getValue();
-					}
-				}
+		if ( $this->fieldsValues ) {
+			if ( empty($models) ) {
+				throw new ExpressionException('Missing DataBase model');
 			}
-			else {
-				if ( !array_key_exists($modelFields['field'], $this->fieldsValues) ) {
-					continue;
-				}
 
-				$type = $modelFields['type'];
-				$value = $this->fieldsValues[$modelFields['field']];
+			$this->finalExpression = $this->getExpressionsDone();
 
-				$valueType = new ValueTypeValidator($value, $type, $modelFields['field']);
+			if ( isset($models[0]) ) {
+				$models = $models[0];
 
-				$fieldMacros = ':'.$modelFields['field'];
-				$values = $valueType->getValue();
-				if ( is_array($values) ) {
+				/**
+				 * @var $models Reader
+				 */
+				$modelProperties = $models->getModelPropertiesTokens();
+			}
 
-					$i = 1;
-					foreach($values AS $v) {
+			foreach($modelProperties AS $alias => $modelFields) {
+				$fieldMacros = null;
+				/**
+				 * @var $modelFields Reader
+				 */
+				if ( is_string($alias) ) {
 
-						$this->prepareStatement[$fieldMacros.'_'.$i] = $v;
-						$i++;
+					$modelFields = $modelFields->getModelPropertiesTokens();
+					foreach($modelFields as $property) {
+
+						if ( !isset($this->fieldsValues[$alias]) ) {
+							continue;
+						}
+
+						foreach($this->fieldsValues AS $field => $value) {
+							if ( strpos($field, $property['field']) === false) {
+								continue;
+							}
+
+							$fieldCheck = ltrim(str_replace($property['field'], '', $field), '_');
+							$catToInt = (int)$fieldCheck;
+
+							if ( $fieldCheck !== '' && $catToInt === 0) {
+								continue;
+							}
+
+							$type = $property['type'];
+							$value = $this->fieldsValues[$alias][$property['field']];
+
+							$valueType = new ValueTypeValidator($value, $type, $property['field']);
+
+							if ( is_array($valueType->getValue()) ) {
+
+								$i = 1;
+								foreach($valueType->getValue() AS $v ) {
+
+									$this->prepareStatement[':'.$alias.$property['field'].'_'.$i] = $v;
+
+									$i++;
+								}
+							}
+							else {
+
+								$this->prepareStatement[':'.$alias.$property['field']] = $valueType->getValue();
+							}
+						}
+
 					}
 				}
 				else {
+					foreach($this->fieldsValues AS $field => $value) {
+						if ( strpos($field, $modelFields['field']) === false) {
+							continue;
+						}
 
-					$this->prepareStatement[$fieldMacros] = $valueType->getValue();
+						$fieldCheck = ltrim(str_replace($modelFields['field'], '', $field), '_');
+						$catToInt = (int)$fieldCheck;
+
+						if ( $fieldCheck !== '' && $catToInt === 0) {
+							continue;
+						}
+
+						$type = $modelFields['type'];
+						$value = $this->fieldsValues[$field];
+
+						$valueType = new ValueTypeValidator($value, $type, $modelFields['field']);
+
+						$fieldMacros = ':'.$field;
+						$values = $valueType->getValue();
+						if ( is_array($values) ) {
+							$i = 1;
+							foreach($values AS $v) {
+
+								$this->prepareStatement[$fieldMacros.'_'.$i] = $v;
+								$i++;
+							}
+						}
+						else {
+
+							$this->prepareStatement[$fieldMacros] = $valueType->getValue();
+						}
+					}
 				}
 			}
 		}
@@ -251,7 +273,21 @@ class Expression extends ExpressionInterface {
 			$this->fieldsValues[$this->alias][$this->fieldName] = null;
 		}
 		else {
-			$this->fieldsValues[$this->fieldName] = null;
+			if ( array_key_exists($this->fieldName, $this->fieldsValues) ) {
+				$count = 0;
+				foreach($this->fieldsValues AS $fieldName => $value) {
+					if ( strpos($fieldName, $this->fieldName) !== false ) {
+						$count++;
+					}
+				}
+				if ( $count ) {
+					$this->fieldName = $this->fieldName."_{$count}";
+				}
+				$this->fieldsValues[$this->fieldName] = null;
+			}
+			else {
+				$this->fieldsValues[$this->fieldName] = null;
+			}
 		}
 
 
@@ -347,6 +383,20 @@ class Expression extends ExpressionInterface {
 		}
 
 		$this->expression .= self::$_IS . ':'. $this->alias.$this->fieldName;
+
+		$this->setFieldValue($value);
+
+		return $this;
+	}
+
+
+	public function isNot($value) {
+
+		if ( !is_null($value) ) {
+			throw new ValueTypeException('Value of IS statement have to be NULL');
+		}
+
+		$this->expression .= self::$_IS_NOT . ':'. $this->alias.$this->fieldName;
 
 		$this->setFieldValue($value);
 
