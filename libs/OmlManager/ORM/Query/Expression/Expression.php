@@ -63,12 +63,13 @@ class Expression extends ExpressionInterface {
 	public function checkValuesTypeByModels(array $models) {
 		$modelProperties = array();
 
-		if ( $this->fieldsValues ) {
-			if ( empty($models) ) {
-				throw new ExpressionException('Missing DataBase model');
-			}
+		if ( empty($models) ) {
+			throw new ExpressionException('Missing DataBase model');
+		}
 
-			$this->finalExpression = $this->getExpressionsDone();
+		$this->finalExpression = $this->getExpressionsDone();
+
+		if ( $this->fieldsValues ) {
 
 			if ( isset($models[0]) ) {
 				$models = $models[0];
