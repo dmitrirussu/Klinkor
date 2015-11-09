@@ -3,7 +3,7 @@
  * Created by Dmitri Russu. <dmitri.russu@gmail.com>
  * Date: 15.04.2014
  * Time: 22:37
- * ${NAMESPACE}${NAME} 
+ * ${NAMESPACE}${NAME}
  */
 namespace OmlManager\ORM\Query\DML\Clauses;
 
@@ -129,13 +129,11 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 		$tableAlias = null;
 
 		//set model
-		if ( isset($alias) ) {
-
+		if ( isset($alias) && is_string($alias) ) {
 			$this->models[$alias] = $this->modelReader;
 			$tableAlias = $this->_AS . $alias;
 		}
 		else {
-
 			$this->models[] = $this->modelReader;
 		}
 		$this->joinModel = ($this->joinModel ? $this->_ON . $this->joinModel : $this->joinModel);

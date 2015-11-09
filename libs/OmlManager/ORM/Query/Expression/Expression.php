@@ -42,14 +42,17 @@ class Expression extends ExpressionInterface {
 
 	private $isGrouped = false;
 
-	private $fieldsValues = array();
 	private $fieldName = null;
 	private $alias = null;
+	private $fieldsValues = array();
 	private $prepareStatement = array();
 	private $inFieldSValues = array();
 
 	public function __construct($expression = null) {
 		$this->expression = null;
+		$this->prepareStatement =
+		$this->fieldsValues =
+		$this->inFieldSValues = array();
 		if ( $expression === '1=1') {
 
 			$this->expressions[] = $expression;
@@ -70,31 +73,30 @@ class Expression extends ExpressionInterface {
 		$this->finalExpression = $this->getExpressionsDone();
 
 		if ( $this->fieldsValues ) {
-
 			if ( isset($models[0]) ) {
 				$models = $models[0];
 
 				/**
 				 * @var $models Reader
 				 */
-				$modelProperties = $models->getModelPropertiesTokens();
+				$models = $models->getModelPropertiesTokens();
 			}
 
-			foreach($modelProperties AS $alias => $modelFields) {
+			foreach($models AS $alias => $modelFields) {
 				$fieldMacros = null;
 				/**
 				 * @var $modelFields Reader
 				 */
 				if ( is_string($alias) ) {
+					$modelFiledProperties = $modelFields->getModelPropertiesTokens();
 
-					$modelFields = $modelFields->getModelPropertiesTokens();
-					foreach($modelFields as $property) {
+					foreach($modelFiledProperties as $property) {
 
 						if ( !isset($this->fieldsValues[$alias]) ) {
 							continue;
 						}
 
-						foreach($this->fieldsValues AS $field => $value) {
+						foreach($this->fieldsValues[$alias] AS $field => $value) {
 							if ( strpos($field, $property['field']) === false) {
 								continue;
 							}
@@ -126,7 +128,6 @@ class Expression extends ExpressionInterface {
 								$this->prepareStatement[':'.$alias.$property['field']] = $valueType->getValue();
 							}
 						}
-
 					}
 				}
 				else {
@@ -168,7 +169,6 @@ class Expression extends ExpressionInterface {
 	}
 
 	public function getPreparedStatement() {
-
 		return $this->prepareStatement;
 	}
 
@@ -270,7 +270,6 @@ class Expression extends ExpressionInterface {
 
 			$this->alias = $fieldArray[0];
 			$this->fieldName = $fieldArray[1];
-
 			$this->fieldsValues[$this->alias][$this->fieldName] = null;
 		}
 		else {
