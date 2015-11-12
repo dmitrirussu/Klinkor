@@ -3,7 +3,7 @@
  * Created by Dumitru Russu.
  * Date: 15.04.2014
  * Time: 20:54
- * ${NAMESPACE}${NAME} 
+ * ${NAMESPACE}${NAME}
  */
 namespace AppLauncher;
 
@@ -11,6 +11,8 @@ use AppLauncher\Action\Request;
 use AppLauncher\Action\Response;
 use AppLauncher\Interfaces\AppControllerInterface;
 use AppLauncher\Secure\Login;
+use AppLauncher\Secure\User;
+use AppLauncher\Utils\AppLog;
 use OmlManager\ORM\OmlORManager;
 
 abstract class Controller implements AppControllerInterface {
@@ -83,6 +85,7 @@ abstract class Controller implements AppControllerInterface {
 		return $this;
 	}
 
+
 	/**
 	 * @return bool
 	 */
@@ -123,6 +126,9 @@ abstract class Controller implements AppControllerInterface {
 		return true;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function logout() {
 		return $this->getRequest()->session()->destroyAll();
 	}
@@ -246,6 +252,13 @@ abstract class Controller implements AppControllerInterface {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * @return Utils\AppLogInterface
+	 */
+	public function logger() {
+		return AppLog::getInstance();
 	}
 
 	/**
