@@ -3,7 +3,7 @@
  * Created by Dumitru Russu.
  * Date: 13.08.2014
  * Time: 11:22
- * AppLauncher\Utils${NAME} 
+ * AppLauncher\Utils${NAME}
  */
 
 namespace AppLauncher\Utils;
@@ -69,7 +69,7 @@ class MethodUtils {
 		$currentPage = $totalPages[$currentPage];
 
 		$startForm = (($currentPage - $maxLengthBeforeCurrentPage) < 1 ? 1 : $currentPage - $maxLengthBeforeCurrentPage);
-		$endOfPage = ($currentPage + $maxLengthAfterCurrentPage > $totalNumberOfPage ? $totalNumberOfPage : $currentPage + $maxLengthAfterCurrentPage);
+		$endOfPage = (($currentPage + $maxLengthAfterCurrentPage) > $totalNumberOfPage ? ($totalNumberOfPage == 0 ? 1 : $totalNumberOfPage) : $currentPage + $maxLengthAfterCurrentPage);
 
 		$pages = range($startForm, $endOfPage);
 
