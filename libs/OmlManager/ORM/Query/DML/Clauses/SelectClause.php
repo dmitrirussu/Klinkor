@@ -3,7 +3,7 @@
  * Created by Dmitri Russu. <dmitri.russu@gmail.com>
  * Date: 15.04.2014
  * Time: 22:37
- * ${NAMESPACE}${NAME}
+ * ${NAMESPACE}${NAME} 
  */
 namespace OmlManager\ORM\Query\DML\Clauses;
 
@@ -78,7 +78,7 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 
 	/**
 	 * @return bool|mixed
-	 * @throws \OmlManager\ORM\Models\ReaderException
+	 * @throws \Exception
 	 */
 	public function fetchAssocOne() {
 		$this->limit(0, 1);

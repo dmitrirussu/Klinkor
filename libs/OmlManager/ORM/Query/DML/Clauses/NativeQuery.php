@@ -58,8 +58,7 @@ class NativeQuery {
 	}
 
 	public function fetchOne() {
-
-		return $this->driver->fetchObject(\PDO::FETCH_CLASS, get_class($this->model));
+		return $this->driver->fetchObject(get_class($this->model));
 	}
 
 	public function fetchAssoc() {

@@ -3,7 +3,7 @@
  * Created by Dmitri Russu. <dmitri.russu@gmail.com>
  * Date: 19.04.2014
  * Time: 16:27
- * ${NAMESPACE}${NAME}
+ * ${NAMESPACE}${NAME} 
  */
 
 namespace OmlManager\ORM\Query\Types;
@@ -140,9 +140,9 @@ class ValueTypeValidator implements ValueTypeInterface {
 				}
 				default: {
 
-					throw new ValueTypeException('Missing type of value, or another');
+				throw new ValueTypeException('Missing type of value, or another');
 
-					break;
+				break;
 				}
 			}
 			$value = $this->value;
@@ -157,42 +157,42 @@ class ValueTypeValidator implements ValueTypeInterface {
 	 */
 	public static function getAvailableValueTypes() {
 		return array(
-			//int
-			ValueTypes::VALUE_TYPE_INT,
-			ValueTypes::VALUE_TYPE_SMALLINT,
-			ValueTypes::VALUE_TYPE_TINYINT,
-			ValueTypes::VALUE_TYPE_MEDIUMINT,
-			ValueTypes::VALUE_TYPE_BIGINT,
-			//float
-			ValueTypes::VALUE_TYPE_DECIMAL,
-			ValueTypes::VALUE_TYPE_FLOAT,
-			ValueTypes::VALUE_TYPE_DOUBLE,
-			ValueTypes::VALUE_TYPE_REAL,
-			//char
-			ValueTypes::VALUE_TYPE_CHAR,
-			ValueTypes::VALUE_TYPE_VARCHAR,
-			ValueTypes::VALUE_TYPE_STRING,
-			ValueTypes::VALUE_TYPE_MEDIUMTEXT,
-			ValueTypes::VALUE_TYPE_TEXT,
-			ValueTypes::VALUE_TYPE_LONGTEXT,
-			//datetime
-			ValueTypes::VALUE_TYPE_DATETIME,
-			ValueTypes::VALUE_TYPE_TIMESTAMP,
-			//boolean
-			ValueTypes::VALUE_TYPE_BIT,
-			ValueTypes::VALUE_TYPE_BOOL,
-			ValueTypes::VALUE_TYPE_BOOLEAN,
-			//null
-			ValueTypes::VALUE_TYPE_NULL,
-			//empty
-			ValueTypes::VALUE_TYPE_EMPTY,
-			//image
-			ValueTypes::VALUE_TYPE_BLOB,
-			ValueTypes::VALUE_TYPE_LONGBLOB,
+				//int
+				ValueTypes::VALUE_TYPE_INT,
+				ValueTypes::VALUE_TYPE_SMALLINT,
+				ValueTypes::VALUE_TYPE_TINYINT,
+				ValueTypes::VALUE_TYPE_MEDIUMINT,
+				ValueTypes::VALUE_TYPE_BIGINT,
+				//float
+				ValueTypes::VALUE_TYPE_DECIMAL,
+				ValueTypes::VALUE_TYPE_FLOAT,
+				ValueTypes::VALUE_TYPE_DOUBLE,
+				ValueTypes::VALUE_TYPE_REAL,
+				//char
+				ValueTypes::VALUE_TYPE_CHAR,
+				ValueTypes::VALUE_TYPE_VARCHAR,
+				ValueTypes::VALUE_TYPE_STRING,
+				ValueTypes::VALUE_TYPE_MEDIUMTEXT,
+				ValueTypes::VALUE_TYPE_TEXT,
+				ValueTypes::VALUE_TYPE_LONGTEXT,
+				//datetime
+				ValueTypes::VALUE_TYPE_DATETIME,
+				ValueTypes::VALUE_TYPE_TIMESTAMP,
+				//boolean
+				ValueTypes::VALUE_TYPE_BIT,
+				ValueTypes::VALUE_TYPE_BOOL,
+				ValueTypes::VALUE_TYPE_BOOLEAN,
+				//null
+				ValueTypes::VALUE_TYPE_NULL,
+				//empty
+				ValueTypes::VALUE_TYPE_EMPTY,
+				//image
+				ValueTypes::VALUE_TYPE_BLOB,
+				ValueTypes::VALUE_TYPE_LONGBLOB,
 
-			//strings
-			ValueTypes::VALUE_TYPE_ENUM,
-			ValueTypes::VALUE_TYPE_SET
+				//strings
+				ValueTypes::VALUE_TYPE_ENUM,
+				ValueTypes::VALUE_TYPE_SET
 		);
 	}
 }

@@ -3,7 +3,7 @@
  * Created by Dmitri Russu. <dmitri.russu@gmail.com>
  * Date: 16.04.2014
  * Time: 18:54
- * ${NAMESPACE}${NAME}
+ * ${NAMESPACE}${NAME} 
  */
 
 namespace OmlManager\ORM\Query\Expression;

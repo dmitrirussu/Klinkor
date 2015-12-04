@@ -58,11 +58,14 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	}
 
 	public function connect() {
+		$options = array(
+			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+		);
 
 		$dbName = ($this->config->getDataBaseName() ? "dbname={$this->config->getDataBaseName()}" : '');
 		$this->driver = new \PDO("{$this->driverName}:host={$this->config->getDataBaseHost()};port={$this->config->getDataBasePort()};{$dbName}",
 		$this->config->getDataBaseUser(),
-		$this->config->getDataBasePassword());
+		$this->config->getDataBasePassword(), $options);
 
 		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	}
