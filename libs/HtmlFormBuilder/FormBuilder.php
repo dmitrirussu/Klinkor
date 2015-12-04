@@ -390,7 +390,7 @@ class FormBuilder implements IFormBuilder {
 			if ($properties) {
 				foreach($properties as $property) {
 					if ( !isset($property['skip']) ) {
-						$this->fieldValue = htmlentities($this->reader->getValueByFieldName($property['field']));
+						$this->fieldValue = htmlentities($this->reader->getValueByFieldName($property['field']), null, 'UTF-8');
 					}
 					else {
 						$this->fieldValue = $property['value'];
