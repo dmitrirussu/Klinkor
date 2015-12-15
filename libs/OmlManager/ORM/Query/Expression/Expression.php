@@ -275,8 +275,8 @@ class Expression extends ExpressionInterface {
 		else {
 			if ( array_key_exists($this->fieldName, $this->fieldsValues) ) {
 				$count = 0;
-				foreach($this->fieldsValues AS $fieldName => $value) {
-					if ( strpos($fieldName, $this->fieldName) !== false ) {
+				foreach($this->fieldsValues AS $field => $value) {
+					if ( strpos($field, $this->fieldName) !== false ) {
 						$count++;
 					}
 				}
