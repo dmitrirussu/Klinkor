@@ -12,8 +12,8 @@ $registeredCommands = array(
 	'create:app:alias' => 'php generator.php create:app:alias [PROJECT_NAME] [PROJECT_ALIAS_NAME]',
 	'create:secured:app' => 'php generator.php create:app [PROJECT_NAME]',
 	'create:secured:app:controller' => 'php generator.php create:app:controller [PROJECT_NAME] [CONTROLLER_NAME]',
-	'create:app:db:entities' => 'php generator.php create:db:entities [PROJECT_NAME] [DATABASE_CONF_NAME]',
-	'create:app:db:entity' => 'php generator.php create:db:entity [PROJECT_NAME] [DATABASE_CONF_NAME] [TABLE_NAME]'
+	'create:app:db:entities' => 'php generator.php create:app:db:entities [PROJECT_NAME] [DATABASE_CONF_NAME]',
+	'create:app:db:entity' => 'php generator.php create:app:db:entity [PROJECT_NAME] [DATABASE_CONF_NAME] [TABLE_NAME]'
 );
 
 try {
@@ -30,8 +30,14 @@ try {
 			$appName = (isset($argv[2]) ? $argv[2] : null);
 			$appAliasName = (isset($argv[3]) ? $argv[3] : null);
 
-			\AppLauncher\Generator\AppGeneratorFactory::create($appAliasName, dirname(__DIR__))
-				->createAppAlias($appName);
+			try {
+				\AppLauncher\Generator\AppGeneratorFactory::create($appAliasName, dirname(__DIR__))
+					->createAppAlias($appName);
+			}
+			catch(\Exception $e) {
+				var_dump($e->getMessage());
+				exit;
+			}
 
 			break;
 		}
@@ -44,7 +50,7 @@ try {
 
 			break;
 		}
-		case 'create:secured:app': {
+		case 'create:secure:app': {
 			$appName = (isset($argv[2]) ? $argv[2] : null);
 
 			\AppLauncher\Generator\AppGeneratorFactory::create($appName, dirname(__DIR__))
@@ -74,7 +80,7 @@ try {
 			}
 			elseif( !is_dir(dirname(__DIR__).'/app/'.$projectAppName.'/Models/') ) {
 
-				throw new Exception('Project directory does not exist, see command -> '. $registeredCommands[$action]);
+				throw new Exception('Project Models ('.dirname(__DIR__).'/app/'.$projectAppName.'/Models/'.') directory does not exist, see command -> '. $registeredCommands[$action]);
 			}
 
 
@@ -117,7 +123,8 @@ try {
 		throw new Exception('Your command is not registered!');
 		}
 	}
-	echo 'Done!';
+
+	echo date('m-d-Y H:i:s', time()).":  DONE\n";
 }
 catch (Exception $e) {
 
