@@ -1,12 +1,10 @@
-What is PHP AppLauncher?
+What is Klinkor?
 ====
 
-- AppLauncher is an Framework which offer possibility to develop Applications and components of app. An application can 
-contain multiple components. This framework offer possibility to create an SimpleApp, AppComponent, Security Application 
-like Admin Panel (CMS), or App Alias.
+- Klinkor is a PHP Framework which give you ability to develop Application as component. An application can be done with multiple components. Also you could do your Application Component extendable as an alias or exportable to another project.  
 
 - What is an AppAlias, it is like on php function sizeof() which is an alias of count(), you can do the same DemoTwoApp 
-can be an Alias of DemoApp. Only DemoTwoApp can have other layout templates or other styles, actions, new Controllers, 
+can be an Alias of DemoApp. Only DemoTwoApp could include other layout templates or other styles, actions, new Controllers, 
 new Models DataBase, behavior of DemoTwoApp can be other. When you generate an App as Alias your App will Extend all 
 Controllers and Application Core from DemoApp.  
 	
@@ -52,7 +50,7 @@ Controllers and Application Core from DemoApp.
 - OML ORM DataBase Manager (https://github.com/dmitrirussu/OmlManager)
 - Session Manager
 - Action Request Manager
-- Action Routing
+- Routing
 - Action Display Layout (Template, HTML, JSON, IMAGE)
  
 
