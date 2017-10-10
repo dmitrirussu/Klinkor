@@ -43,7 +43,7 @@ class AppGenerator {
 		$this->createAppFolder();
 		$this->createBaseAppClass(false, $appAlias);
 
-		$appAlias = ucfirst($appAlias) . 'App';
+		$appAlias = ucfirst($appAlias).'App';
 
 		if ( is_dir($this->path.'/app/'.$appAlias.'/Controllers/') ) {
 			$dir = opendir($this->path.'/app/'.$appAlias.'/Controllers/');
@@ -52,6 +52,10 @@ class AppGenerator {
 
 				if ( strlen($entry) > 2) {
 					$pathInfo = pathinfo($entry);
+					if ( empty($pathInfo['filename']) ) {
+						continue;
+					}
+
 					$controllerName = str_replace('Controller', '', $pathInfo['filename']);
 
 					$this->createAppController($controllerName, false, $appAlias);

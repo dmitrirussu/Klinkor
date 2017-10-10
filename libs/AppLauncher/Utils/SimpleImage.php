@@ -773,7 +773,7 @@ class SimpleImage {
 		imagefilter($this->image, IMG_FILTER_PIXELATE, $block_size, true);
 		return $this;
 	}
-	
+
 	/**
 	 * Resize an image to the specified dimensions
 	 *
@@ -853,12 +853,21 @@ class SimpleImage {
 		{
 			$optimalWidth = $newWidth;
 			$optimalHeight= $this->getSizeByFixedWidth($newWidth);
+
+			if ($newHeight > 0 && $newHeight < $optimalHeight ) {
+				$newWidth = $newWidth-10;
+				return $this->getSizeByAuto($newWidth, $newHeight);
+			}
 		}
 		elseif ($this->height > $this->width)
 			// *** Image to be resized is taller (portrait)
 		{
 			$optimalWidth = $this->getSizeByFixedHeight($newHeight);
 			$optimalHeight= $newHeight;
+			if ($newWidth > 0 && $newWidth < $optimalWidth ) {
+				$newHeight = $newHeight-10;
+				return $this->getSizeByAuto($newWidth, $newHeight);
+			}
 		}
 		else
 			// *** Image to be resizerd is a square
@@ -866,9 +875,17 @@ class SimpleImage {
 			if ($newHeight < $newWidth) {
 				$optimalWidth = $newWidth;
 				$optimalHeight= $this->getSizeByFixedWidth($newWidth);
+				if ($newHeight > 0 && $newHeight < $optimalHeight ) {
+					$newWidth = $newWidth-10;
+					return $this->getSizeByAuto($newWidth, $newHeight);
+				}
 			} else if ($newHeight > $newWidth) {
 				$optimalWidth = $this->getSizeByFixedHeight($newHeight);
 				$optimalHeight= $newHeight;
+				if ($newWidth > 0 && $newWidth < $optimalWidth ) {
+					$newHeight = $newHeight-10;
+					return $this->getSizeByAuto($newWidth, $newHeight);
+				}
 			} else {
 				// *** Sqaure being resized to a square
 				$optimalWidth = $newWidth;

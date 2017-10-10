@@ -3,13 +3,14 @@
  * Created by Dumitru Russu.
  * Date: 05.07.2014
  * Time: 14:17
- * AppLauncher${NAME} 
+ * AppLauncher${NAME}
  */
 
 namespace AppLauncher;
 
 
-use AppLauncher\Action\Rooting;
+use AppLauncher\Action\Routing;
+use BackOfficeApp\Models\PopaccountingPackage\Model\AppSettings;
 
 class Scripts {
 
@@ -40,13 +41,11 @@ class Scripts {
 	}
 
 	public static function addCSSFile($fileName) {
-
 		self::$CSS_FILES[$fileName] = $fileName;
 	}
 
 
 	public static function addScriptJsFile($fileName) {
-
 		self::$JS_FILES[$fileName] = $fileName;
 	}
 
@@ -78,6 +77,10 @@ class Scripts {
 
 	public static function getCssFiles() {
 
+		if  ( isset(self::$CSS_FILES['styles']) ) {
+			self::$CSS_FILES[] = self::$CSS_FILES['styles'];
+			unset(self::$CSS_FILES['styles']);
+		}
 		return self::$CSS_FILES;
 	}
 
@@ -90,77 +93,176 @@ class Scripts {
 	 * @return Scripts
 	 */
 	public static function showJs() {
-		self::appDirectories(RegisterApp::instance()->getBaseApp(), $apps);
-		self::appDirectories(RegisterApp::instance()->getRegisteredApps(), $apps);
-
-
+		require_once PATH_LIBS."minify/vendor/autoload.php";
+		$minifyJS = new \MatthiasMullie\Minify\JS();
+		$domain = (APP_CURRENT_FOLDER ? DOMAIN_FILE_RESOURCES : '');
+		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
 		$jsScripts = '';
-		$apps[] = 'global';
-
+		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
+		array_unshift($apps, array('app' => 'global'));
+		$minFileName = '';
+		$minFileExists = 1;
+		try {
+			$scriptMinify = AppSettings::getConstValue('SCRIPTS_MINIFY');
+		}
+		catch (\Exception $e) {
+			$scriptMinify = 0;
+		}
 		if ( $apps ) {
-
-			$apps = array_reverse($apps);
 			$javascriptFiles = self::getScriptsJs();
-			$domain = (APP_FOLDER ? DOMAIN_RESOURCES : '');
 
 			foreach($apps as $app) {
 				if ( $javascriptFiles ) {
 					foreach($javascriptFiles as $jsFile) {
-						$fileNameRoot = self::PUBLIC_DIRECTORY.'/'.$app.'/'.$jsFile.'.js';
+						$fileNameRoot = self::PUBLIC_DIRECTORY.'/'.$app['app'].'/'.$jsFile.'.js';
 						$fileNameRootDir = dirname(__DIR__).'/..'.$fileNameRoot;
 
-						$fileName = self::PUBLIC_DIRECTORY.'/'.$app.'/js/'.$jsFile.'.js';
+						$fileName = self::PUBLIC_DIRECTORY.'/'.$app['app'].'/js/'.$jsFile.'.js';
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
-						if ( file_exists($fileNameRootDir) ) {
-							self::writeJs($jsScripts, $domain.$fileNameRoot);
+						if ( is_file($fileNameRootDir) ) {
+							if ( strpos($fileNameRoot, 'min') === false && $scriptMinify) {
+								$minFileName .= str_replace(array('=', '/', '\\', '.'),  '', $jsFile);
+								$minifyJS->add(PATH_PUBLIC.str_replace('/public/', '', $fileNameRoot));
+							}
+							else {
+								self::writeJs($jsScripts, $domain.$fileNameRoot);
+							}
 						}
 
-						if ( file_exists($fileDir) ) {
-							self::writeJs($jsScripts, $domain.$fileName);
+						if ( is_file($fileDir) ) {
+							if ( strpos($fileDir, 'min') === false && $scriptMinify) {
+								$minFileName .= str_replace(array('=', '/', '\\', '.', '-'),  '_', $jsFile);
+								$minifyJS->add( PATH_PUBLIC . str_replace( '/public/', '', $fileName ) );
+							}
+							else {
+								self::writeJs($jsScripts, $domain.$fileName);
+							}
 						}
 					}
 				}
 			}
 
+			if ( $scriptMinify ) {
+				// Check for buggy versions of Internet Explorer
+				if (!strstr($_SERVER['HTTP_USER_AGENT'], 'Opera') &&
+				    preg_match('/^Mozilla\/4\.0 \(compatible; MSIE ([0-9]\.[0-9])/i', $_SERVER['HTTP_USER_AGENT'], $matches)) {
+					$version = floatval($matches[1]);
+
+					if ($version < 6) {
+						$minFileExists = $acceptGZCompression = 0;
+					}
+
+					if ($version == 6 && !strstr($_SERVER['HTTP_USER_AGENT'], 'EV1')) {
+						$minFileExists = $acceptGZCompression = 0;
+					}
+				}
+
+
+				$minFileName = md5($minFileName);
+				$minFileName = strtolower("global/js/min/{$minFileName}{$acceptGZCompression}.js");
+				$minFileExists = ($minFileExists && is_file(PATH_PUBLIC.$minFileName) ?  true : false);
+
+				if ( !$minFileExists ) {
+					if ( !is_dir(PATH_PUBLIC.'global/js/min/') ) {
+						mkdir(PATH_PUBLIC.'global/js/min/', true);
+						chmod(PATH_PUBLIC.'global/js/min/', 755);
+					}
+					($acceptGZCompression ? $minifyJS->gzip(PATH_PUBLIC.$minFileName) : $minifyJS->minify(PATH_PUBLIC.$minFileName));
+				}
+
+				self::writeJs($jsScripts, "{$domain}/public/global/scripts.php?file={$minFileName}&compression={$acceptGZCompression}");
+			}
 		}
 
 		return print($jsScripts);
 	}
 
 	public static function showCSS() {
-		self::appDirectories(RegisterApp::instance()->getBaseApp(), $apps);
-		self::appDirectories(RegisterApp::instance()->getRegisteredApps(), $apps);
-
+		require_once PATH_LIBS."minify/vendor/autoload.php";
+		$minifyCSS = new \MatthiasMullie\Minify\CSS();
+		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
+		$domain = (APP_CURRENT_FOLDER ? DOMAIN_FILE_RESOURCES : '');
+		$minFileName = '';
+		$minFileExists = 1;
 		$cssLinks = '';
-		$apps[] = 'global';
+		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
+		array_unshift($apps, array('app' => 'global'));
+		try {
+			$scriptMinify = AppSettings::getConstValue('SCRIPTS_MINIFY');
+		}
+		catch (\Exception $e) {
+			$scriptMinify = 0;
+		}
 
 		if ( $apps ) {
-			$apps = array_reverse($apps);
 			$cssFiles = self::getCssFiles();
-			$domain = (APP_FOLDER ? DOMAIN_RESOURCES : '');
 
 			foreach($apps as $app) {
-
 				if ( $cssFiles ) {
 					foreach($cssFiles as $cssFile) {
-						$rootFileName = self::PUBLIC_DIRECTORY.'/'.$app.'/'.$cssFile.'.css';
+						$rootFileName = self::PUBLIC_DIRECTORY.'/'.$app['app'].'/'.$cssFile.'.css';
 						$rootFileDir = dirname(__DIR__).'/..'.$rootFileName;
 
-						$fileName = self::PUBLIC_DIRECTORY.'/'.$app.'/css/'.$cssFile.'.css';
+						$fileName = self::PUBLIC_DIRECTORY.'/'.$app['app'].'/css/'.$cssFile.'.css';
 						$fileDir = dirname(__DIR__).'/..'.$fileName;
 
-						if (file_exists($rootFileDir)) {
-							self::writeCss($cssLinks, $domain.$rootFileName);
+						if (is_file($rootFileDir)) {
+							if ( $scriptMinify ) {
+								$minFileName .= str_replace(array('=', '/', '\\', '.'),  '', $cssFile);
+								$minifyCSS->add( PATH_PUBLIC . str_replace( '/public/', '', $rootFileName ) );
+							}
+							else {
+								self::writeCss($cssLinks, $domain.$rootFileName);
+							}
 						}
 
-						if (file_exists($fileDir)) {
-							self::writeCss($cssLinks, $domain.$fileName);
+						if (is_file($fileDir)) {
+							if ( $scriptMinify ) {
+								$minFileName .= str_replace(array('=', '/', '\\', '.'),  '', $cssFile);
+								$minifyCSS->add( PATH_PUBLIC . str_replace( '/public/', '', $fileName ) );
+							}
+							else {
+								self::writeCss($cssLinks, $domain.$fileName);
+							}
 						}
 					}
 				}
 			}
+
+
+			if ( $scriptMinify ) {
+				// Check for buggy versions of Internet Explorer
+				if ( ! strstr( $_SERVER['HTTP_USER_AGENT'], 'Opera' ) &&
+				     preg_match( '/^Mozilla\/4\.0 \(compatible; MSIE ([0-9]\.[0-9])/i', $_SERVER['HTTP_USER_AGENT'], $matches )
+				) {
+					$version = floatval( $matches[1] );
+
+					if ( $version < 6 ) {
+						$minFileExists = $acceptGZCompression = 0;
+					}
+
+					if ( $version == 6 && ! strstr( $_SERVER['HTTP_USER_AGENT'], 'EV1' ) ) {
+						$minFileExists = $acceptGZCompression = 0;
+					}
+				}
+
+				$minFileName   = md5($minFileName);
+				$minFileName   = strtolower( "global/css-min/{$minFileName}{$acceptGZCompression}.css" );
+				$minFileExists = ( $minFileExists && is_file( PATH_PUBLIC . $minFileName ) ? true : false );
+
+				if ( !$minFileExists ){
+					if ( !is_dir(PATH_PUBLIC.'global/css-min/') ) {
+						mkdir(PATH_PUBLIC.'global/css-min/', true);
+						chmod(PATH_PUBLIC.'global/css-min/', 755);
+					}
+					( $acceptGZCompression ? $minifyCSS->gzip( PATH_PUBLIC . $minFileName ) : $minifyCSS->minify( PATH_PUBLIC . $minFileName ) );
+				}
+
+				self::writeCss( $cssLinks, "{$domain}/public/global/css-min/scripts.php?file={$minFileName}&compression={$acceptGZCompression}" );
+			}
 		}
+
 
 		return print($cssLinks);
 	}
@@ -180,55 +282,4 @@ class Scripts {
 	private static function writeJs(&$script, $fileDirectory) {
 		$script .= str_replace(self::MACROS_URL, $fileDirectory, self::SCRIP);
 	}
-
-	/**
-	 * App Directories
-	 * @param $appName
-	 * @param array $apps
-	 * @return bool
-	 */
-	private static function appDirectories($appName, &$apps = array()) {
-
-		if ( empty($appName) ) {
-
-			return $apps;
-		}
-		if ( is_array($appName) && $appName) {
-
-			foreach($appName as $registeredApp) {
-				self::appDirectories($registeredApp, $apps);
-			}
-
-			return $apps;
-		}
-
-		if ( is_object($appName) ) {
-			$baseAppReflectionObject = new \ReflectionObject($appName);
-
-			$apps[] = $baseAppReflectionObject->getNamespaceName();
-
-			if ( $baseAppReflectionObject->getParentClass() ) {
-
-				self::appDirectories($baseAppReflectionObject->getParentClass()->getName(), $apps);
-			}
-		}
-		elseif($appName) {
-
-			$baseAppReflectionClass = new \ReflectionClass($appName);
-
-			if ( $baseAppReflectionClass->isAbstract() ) {
-				return $apps;
-			}
-
-			$apps[] = $baseAppReflectionClass->getNamespaceName();
-
-			if ( $baseAppReflectionClass->getParentClass() ) {
-
-				self::appDirectories($baseAppReflectionClass->getParentClass()->getName(), $apps);
-			}
-
-		}
-		return array_reverse($apps);
-	}
-
 }

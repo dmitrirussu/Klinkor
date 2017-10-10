@@ -13,10 +13,13 @@ use AppLauncher\RegisterAppFacade;
 interface RegisterAppInterface {
 
 	/**
-	 * @param AppControllerInterface $app
+	 * @param $app
 	 * @return self
 	 */
-	public function addApp(AppControllerInterface $app);
+	public function addApp($app);
+	public function addRunningApp($app);
+	public function getCurrentRunningApp();
+	public function getCurrentRunningAppPrentApps();
 
 	/**
 	 * @return RegisterAppFacade

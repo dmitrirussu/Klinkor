@@ -1,4 +1,4 @@
-What is Klinkor?
+Main purpose of Klinkor Framework
 ====
 
 - Klinkor is a PHP Framework which give you ability to develop Application as component. An application can be done with multiple components. Also you could do your Application Component extendable as an alias or exportable to another project.  

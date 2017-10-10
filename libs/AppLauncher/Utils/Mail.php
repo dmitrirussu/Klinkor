@@ -83,9 +83,16 @@ class Mail implements MailInterface {
 		return $this;
 	}
 
-	public function setBody($body, $contentType = null, $charset = null) {
-		$this->message->setBody($body, $contentType, $charset);
-		return $this;
+	public function setBody($body, $contentType = null, $charset = 'utf-8') {
+
+		if ( strcmp(trim($contentType), 'text/html') === 0) {
+			$this->message->setBody(nl2br($body), $contentType, $charset);
+		}
+		else {
+			$this->message->setBody(nl2br($body), $contentType, $charset);
+		}
+
+		return $this->message;
 	}
 
 	public function send() {

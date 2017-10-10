@@ -70,4 +70,10 @@ class NativeQuery {
 
 		return $this->driver->fetch(\PDO::FETCH_ASSOC);
 	}
+
+
+	public function getRowCount() {
+
+		return $this->driver->rowCount();
+	}
 } 

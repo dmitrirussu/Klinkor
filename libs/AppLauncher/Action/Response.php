@@ -56,6 +56,10 @@ class Response {
 		return $this->responseData['filename'];
 	}
 
+	public function getNewFileName() {
+		return isset($this->responseData['new_filename']) ? $this->responseData['new_filename'] : '';
+	}
+
 
 	/**
 	 * @return mixed
@@ -124,6 +128,9 @@ class Response {
 	 * @throws \AppLauncher\Exceptions\ResponseException
 	 */
 	public function getData() {
+		if ( $this->getDisplay() ) {
+			return $this->getDisplay();
+		}
 
 		if( !isset($this->responseData['data']) ) {
 
@@ -131,6 +138,22 @@ class Response {
 		}
 
 		return $this->responseData['data'];
+	}
+
+
+	/**
+	 * @return mixed
+	 */
+	public function getErrorCode() {
+		return (isset($this->responseData['error_code']) ? $this->responseData['error_code'] : 200);
+	}
+
+	/**
+	 * @return mixed
+	 * @throws \AppLauncher\Exceptions\ResponseException
+	 */
+	public function getErrorMessage() {
+		return (isset($this->responseData['error_message']) ? $this->responseData['error_message'] : null);
 	}
 
 

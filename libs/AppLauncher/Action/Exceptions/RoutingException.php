@@ -9,6 +9,6 @@
 namespace AppLauncher\Action\Exceptions;
 
 
-class RootingException extends \Exception {
+class RoutingException extends \Exception {
 
 } 

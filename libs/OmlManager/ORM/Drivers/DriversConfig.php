@@ -29,18 +29,15 @@ class DriversConfig implements DriverConfigInterface {
 
 	private static $DBS_CONNECTIONS;
 	private $confName;
+	private $switchOnWritePort;
 	const DATABASE_CONF_FILE_PATH = '/../../../config/databases.ini';
+	/**
+	 * @var $instance self
+	 */
+	private static $instance;
 
 
-	public function __construct($dbConfigName = 'default') {
-
-		if ( empty($dbConfigName) ) {
-
-			throw new DriverConfigException('Missing database name ' . $this->confName);
-		}
-
-		$this->confName = $dbConfigName;
-
+	private function __construct() {
 		self::$DBS_CONNECTIONS = new \stdClass();
 
 		//Conf for TEST Database
@@ -51,6 +48,7 @@ class DriversConfig implements DriverConfigInterface {
 		self::$DBS_CONNECTIONS->default->user = 'root';
 		self::$DBS_CONNECTIONS->default->password = '';
 		self::$DBS_CONNECTIONS->default->port = '3306';
+		self::$DBS_CONNECTIONS->default->write_port = '3306';
 
 		if ( file_exists(dirname(__DIR__) . self::DATABASE_CONF_FILE_PATH) ) {
 
@@ -65,9 +63,55 @@ class DriversConfig implements DriverConfigInterface {
 					self::$DBS_CONNECTIONS->{$dbName}->user = (isset($database['user']) ? $database['user'] : '');
 					self::$DBS_CONNECTIONS->{$dbName}->password = (isset($database['password']) ? $database['password'] : '');
 					self::$DBS_CONNECTIONS->{$dbName}->port = (isset($database['port']) ? $database['port'] : '3306');
+					self::$DBS_CONNECTIONS->{$dbName}->write_port = (isset($database['write_port']) ? $database['write_port'] : '3306');
 				}
 			}
 		}
+
+		return $this;
+	}
+
+
+	public function setDbConfName($name) {
+		$this->confName = $name;
+		return $this;
+	}
+
+
+	public function setSwitchOnWritePort($switch = 0) {
+		$this->switchOnWritePort = $switch;
+		return $this;
+	}
+
+
+	public function getDbConfName() {
+		return $this->confName;
+	}
+
+
+	public function getSwitchOnWritePort() {
+		return $this->switchOnWritePort;
+	}
+
+
+
+	public static function instance($confName = 'default', $switchOn = 0) {
+		if ( empty($confName) ) {
+			throw new DriverConfigException('Missing database name ' . $confName);
+		}
+
+		if ( self::$instance ) {
+			self::$instance->setDbConfName($confName);
+			self::$instance->setSwitchOnWritePort($switchOn);
+			return self::$instance;
+		}
+
+		self::$instance = new self();
+
+		self::$instance->setDbConfName($confName);
+		self::$instance->setSwitchOnWritePort($switchOn);
+
+		return self::$instance;
 	}
 
 	/**
@@ -171,6 +215,10 @@ class DriversConfig implements DriverConfigInterface {
 		if ( !isset(self::$DBS_CONNECTIONS->{$this->confName}->{'port'}) ) {
 
 			throw new DriverConfigException('Missing port database ' . $this->confName);
+		}
+
+		if ( $this->getSwitchOnWritePort() ) {
+			return self::$DBS_CONNECTIONS->{$this->confName}->{'write_port'};
 		}
 
 		return self::$DBS_CONNECTIONS->{$this->confName}->{'port'};

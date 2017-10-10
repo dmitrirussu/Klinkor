@@ -104,6 +104,7 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 			SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
 				->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement()));
 
+
 		return $modelCollection->getCollections($fetchAssoc);
 	}
 
@@ -121,6 +122,14 @@ class SelectClause implements DMLClauseInterface, ClauseSelectInterface {
 		);
 
 		return $modelCollection->getCollections(true);
+	}
+
+	/*
+	 * Get row Count
+	 */
+	public function getRowCount() {
+		return SDBManagerConnections::getManager($this->getModelReader()->getModelDataDriverConfName())
+			->getDriver()->query($this->getQuery(), $this->expression->getPreparedStatement())->getRowCount();
 	}
 
 	public function model($object, $alias = null) {

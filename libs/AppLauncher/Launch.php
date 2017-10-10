@@ -29,12 +29,12 @@ class Launch {
 	 * @param string $env
 	 * @return RegisterAppInterface
 	 */
-	public static function app(AppControllerInterface $baseApp, $env = self::ENV_PROD) {
+	public static function app($baseApp, $env = self::ENV_PROD) {
 		self::$CURRENT_ENV = $env;
 		self::displayErrors();
 
 		//App Registrar
-		return RegisterApp::instance()->addBaseApp($baseApp)->addApp(new ErrorApp());
+		return RegisterApp::instance()->addBaseApp($baseApp)->addApp('ErrorApp\ErrorApp');
 	}
 
 	/**

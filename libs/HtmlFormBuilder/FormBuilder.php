@@ -3,7 +3,7 @@
  * Created by Dumitru Russu.
  * Date: 27.06.2014
  * Time: 22:07
- * FormsGenerator${NAME}
+ * FormsGenerator${NAME} 
  */
 
 namespace HtmlFormBuilder;
@@ -64,8 +64,8 @@ class FormBuilder implements IFormBuilder {
 		'method' => 'post',
 		'fields' => array(),
 		'buttons' => array(
-			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
-			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
+			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET, 'name' => ''),
+			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT, 'name' => ''),
 		));
 
 
@@ -82,8 +82,8 @@ class FormBuilder implements IFormBuilder {
 									'method' => 'post',
 									'fields' => array(),
 									'buttons' => array(
-										'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
-										'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
+										'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET, 'name' => ''),
+										'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT, 'name' => ''),
 									)), $simpleForm = false) {
 
 		if ( empty($mainModel) ) {
@@ -114,8 +114,8 @@ class FormBuilder implements IFormBuilder {
 		'method' => 'post',
 		'fields' => array(),
 		'buttons' => array(
-			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET),
-			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT),
+			'reset' => array('active' => true, 'keyword' => 'Reset', 'type' => FormObjectTypes::RESET, 'name' => ''),
+			'submit' => array('active' => true, 'keyword' => 'Submit', 'type' => FormObjectTypes::SUBMIT, 'name' => ''),
 		))) {
 
 		if ( empty($model) ) {
@@ -159,12 +159,13 @@ class FormBuilder implements IFormBuilder {
 	 * @param array $selectBoxData
 	 * @return $this
 	 */
-	public function addSelectBoxData($fieldName, $fieldKey = '', $fields = array(), $selectBoxData = array(), $selectedValues = array()) {
+	public function addSelectBoxData($fieldName, $fieldKey = '', $fields = array(), $selectBoxData = array(), $selectedValues = array(), $disabledValues = array()) {
 		$this->selectBoxData[$fieldName] = array(
 			'key' => $fieldKey,//field Key On Option Value
 			'fields' => $fields, //Fields Name on The Option
 			'data' => $selectBoxData, //Select Box Option Name
 			'selected_values' => $selectedValues, //Select Box Option Name
+            'disabled_values' => $disabledValues
 		);
 		return $this;
 	}
@@ -337,55 +338,56 @@ class FormBuilder implements IFormBuilder {
 		$lengthOfModels = count($this->MODELS);
 
 		$i = 0;
-		foreach($this->MODELS as $model) {
+
+		foreach($this->MODELS as &$model) {
 			$this->reader = new ModelFieldsReader($model['model']);
 			$properties = $this->reader->getModelPropertiesTokens();
 
 			if ( $model['model'] )
 
-				if ( $properties ) {
-					$propertiesAdd = $properties;
+			if ( $properties ) {
+				$propertiesAdd = $properties;
 
-					$a = 0;
-					foreach($propertiesAdd AS $property) {
-						foreach($this->fieldsAppended AS $field) {
-							if($field['position'] === $property['field'] && $field['model'] instanceof $model['model']) {
-								$this->arrayInsert($properties, $a+1, array(array(
-									'var' => '$'.$field['field_name'],
-									'field' => $field['field_name'],
-									'value' => $field['value'],
-									'type' => $field['type'],
-									'length' => 1000,
-									'skip' => true
-								)));
-								unset($this->fieldsAppended[$field['field_name']]);
-							}
-							else if ($field['position'] === 'top' && $field['model'] instanceof $model['model']) {
-								$this->arrayInsert($properties, 0, array(array(
-									'var' => '$'.$field['field_name'],
-									'field' => $field['field_name'],
-									'value' => $field['value'],
-									'type' => $field['type'],
-									'length' => 1000,
-									'skip' => true
-								)));
-								unset($this->fieldsAppended[$field['field_name']]);
-							}
-							else if ($field['position'] === 'end' && $field['model'] instanceof $model['model']) {
-								$this->arrayInsert($properties, count($properties), array(array(
-									'var' => '$'.$field['field_name'],
-									'field' => $field['field_name'],
-									'value' => $field['value'],
-									'type' => $field['type'],
-									'length' => 1000,
-									'skip' => true
-								)));
-								unset($this->fieldsAppended[$field['field_name']]);
-							}
+				$a = 0;
+				foreach($propertiesAdd AS $property) {
+					foreach($this->fieldsAppended AS $field) {
+						if($field['position'] === $property['field'] && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, $a+1, array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
 						}
-						$a++;
+						else if ($field['position'] === 'top' && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, 0, array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
+						}
+						else if ($field['position'] === 'end' && $field['model'] instanceof $model['model']) {
+							$this->arrayInsert($properties, count($properties), array(array(
+								'var' => '$'.$field['field_name'],
+								'field' => $field['field_name'],
+								'value' => $field['value'],
+								'type' => $field['type'],
+								'length' => 1000,
+								'skip' => true
+							)));
+							unset($this->fieldsAppended[$field['field_name']]);
+						}
 					}
+					$a++;
 				}
+			}
 
 			if ($properties) {
 				foreach($properties as $property) {
@@ -425,7 +427,7 @@ class FormBuilder implements IFormBuilder {
 
 					//check exist property type inside of fields
 					$propertyType = (isset($options['fields'][$property['field']]['type']) ?
-						$options['fields'][$property['field']]['type'] : (isset($this->fieldsType[$property['field']]) ?
+											$options['fields'][$property['field']]['type'] : (isset($this->fieldsType[$property['field']]) ?
 							$this->fieldsType[$property['field']] : $property['type']));
 
 					switch($propertyType) {
@@ -452,7 +454,7 @@ class FormBuilder implements IFormBuilder {
 						case ValueTypes::VALUE_TYPE_INT: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::NUMBER);
 
-							break;
+						break;
 						}
 						case ValueTypes::VALUE_TYPE_DECIMAL:
 						case ValueTypes::VALUE_TYPE_DOUBLE:
@@ -460,21 +462,21 @@ class FormBuilder implements IFormBuilder {
 						case ValueTypes::VALUE_TYPE_FLOAT: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::NUMBER);
 
-							break;
+						break;
 						}
 						case FormObjectTypes::SELECT:
 						case ValueTypes::VALUE_TYPE_SET:
 						case ValueTypes::VALUE_TYPE_ENUM: {
 							$this->buildEnumSelectBox($model, $property, $propertyFieldName);
 
-							break;
+						break;
 						}
 						case FormObjectTypes::FILE:
 						case ValueTypes::VALUE_TYPE_BLOB:
 						case ValueTypes::VALUE_TYPE_LONGBLOB: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::FILE);
 
-							break;
+						break;
 						}
 						case ValueTypes::VALUE_TYPE_TIMESTAMP:
 						case ValueTypes::VALUE_TYPE_DATETIME:
@@ -482,26 +484,26 @@ class FormBuilder implements IFormBuilder {
 						case ValueTypes::VALUE_TYPE_TIME: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::DATETIME);
 
-							break;
+						break;
 						}
 						case ValueTypes::VALUE_TYPE_TEXT:
 						case ValueTypes::VALUE_TYPE_MEDIUMTEXT:
 						case ValueTypes::VALUE_TYPE_LONGTEXT: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property, FormObjectTypes::TEXTAREA);
 
-							break;
+						break;
 						}
 						case ValueTypes::VALUE_TYPE_STRING:
 						case ValueTypes::VALUE_TYPE_VARCHAR:
 						case ValueTypes::VALUE_TYPE_CHAR: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property);
 
-							break;
+						break;
 						}
 						default: {
 							$this->buildInputTextObject($model, $propertyFieldName, $property);
 
-							break;
+						break;
 						}
 					}
 				}
@@ -553,21 +555,30 @@ class FormBuilder implements IFormBuilder {
 			}
 		}
 
+		if ( in_array($property['field'], $this->getRequiredFields()) ) {
+			$attribute .= 'required="required"';
+		}
+
+		$requiredSpan = '';
+		if ( in_array($property['field'], $this->getRequiredFields()) ) {
+			$attribute .= 'required="required"';
+			$requiredSpan = '<span class="required-field">*</span>';
+		}
 
 		switch($type) {
 			case FormObjectTypes::TEXT: {
 				$object =
-					FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').
-					FormObjects::input(FormObjectTypes::TEXT, $propertyFieldName, $this->fieldValue,
-						'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
+				FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').$requiredSpan.
+				FormObjects::input(FormObjectTypes::TEXT, $propertyFieldName, $this->fieldValue,
+					'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
 
 				break;
 			}
 			case FormObjectTypes::PASSWORD: {
 				$object =
-					FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').
-					FormObjects::input(FormObjectTypes::PASSWORD, $propertyFieldName, $this->fieldValue,
-						'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
+				FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"').$requiredSpan.
+				FormObjects::input(FormObjectTypes::PASSWORD, $propertyFieldName, $this->fieldValue,
+					'class="'.$objectClassName.'" id="'.$propertyFieldName.'" ' . $attribute);
 
 				break;
 			}
@@ -577,7 +588,7 @@ class FormBuilder implements IFormBuilder {
 				}
 
 				$object = FormObjects::label(FormObjects::input($type, $propertyFieldName, $this->fieldValue,
-						'id="'.$propertyFieldName.'" ' . $checked . ' ' . $attribute).
+					'id="'.$propertyFieldName.'" ' . $checked . ' ' . $attribute).$requiredSpan.
 					FormTranslations::t('form', $fieldLabel), ' for="'.$property['field'].'"');
 
 				$classes = 'checkbox';
@@ -586,13 +597,13 @@ class FormBuilder implements IFormBuilder {
 			case FormObjectTypes::TEXTAREA: {
 
 				$object .= FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$propertyFieldName.'"') .
-					FormObjects::textArea($propertyFieldName, $this->fieldValue, false,'class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'" ' . $attribute);
+				FormObjects::textArea($propertyFieldName, $this->fieldValue, false,'class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'" ' . $attribute);
 
 				break;
 			}
 			default: {
 				$objectClassName = ($type === FormObjectTypes::FILE ? '' : $objectClassName);
-				$label = FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$property['field'].'"');
+				$label = FormObjects::label(FormTranslations::t('form', $fieldLabel), ' for="'.$property['field'].'"').$requiredSpan;
 
 				if ( (isset($property['primary_key']) || isset($property['auto_increment']) ) || $type === FormObjectTypes::HIDDEN) {
 
@@ -632,6 +643,8 @@ class FormBuilder implements IFormBuilder {
 		}
 		$selectedValues = isset($fieldOptions['selected_values']) ? $fieldOptions['selected_values'] : array();
 
+        $disabledValues = isset($fieldOptions['disabled_values']) ? $fieldOptions['disabled_values'] : array();
+
 
 		$methodKey = (isset($fieldOptions['key']) ? $fieldOptions['key'] : $property['field']);
 
@@ -643,7 +656,7 @@ class FormBuilder implements IFormBuilder {
 		}
 		else {
 
-			$optionsResult = $this->generateOptionsFromObjectList($methodKey, $selectedValues, $fieldOptions);
+			$optionsResult = $this->generateOptionsFromObjectList($methodKey, $selectedValues, $fieldOptions, $disabledValues);
 		}
 
 		if ( isset($this->fieldsLabel[$property['field']]) ) {
@@ -671,7 +684,13 @@ class FormBuilder implements IFormBuilder {
 			}
 		}
 
-		$object = FormObjects::label(FormTranslations::t('form', $fieldName), ' for="'.$propertyFieldName.'"').
+		$requiredSpan = '';
+		if ( in_array($property['field'], $this->getRequiredFields()) ) {
+			$attribute .= 'required="required"';
+			$requiredSpan = '<span class="required-field">*</span>';
+		}
+
+		$object = FormObjects::label(FormTranslations::t('form', $fieldName), ' for="'.$propertyFieldName.'"').$requiredSpan.
 			FormObjects::select($propertyFieldName, $optionsResult, 'class="'.$objectClassName.'"' . ' id="'.$propertyFieldName.'"' . ' ' . $attribute . $multiple);
 
 		$this->formObjects .= FormObjects::fieldset($object, 'class="'.$classes.'"');
@@ -709,7 +728,7 @@ class FormBuilder implements IFormBuilder {
 	 * @param $optionFields
 	 * @return string
 	 */
-	private function generateOptionsFromObjectList($methodKey, $selectedValues, $optionFields) {
+	private function generateOptionsFromObjectList($methodKey, $selectedValues, $optionFields, $disabledValues) {
 		$optionsResult = '';
 		//Get Data from Select
 		$methodName = FormBuilderUtils::getGetterMethod($methodKey);
@@ -720,6 +739,7 @@ class FormBuilder implements IFormBuilder {
 				$optionDataKey = $optionData;
 				$isObject = false;
 				$selected = '';
+                $disabled = '';
 
 				if ( $this->fieldValue == $value && !is_object($optionData)) {
 					$selected = true;
@@ -742,9 +762,13 @@ class FormBuilder implements IFormBuilder {
 					if ( $this->fieldValue == $value || $this->checkValueInArray($methodKey, $value, $selectedValues)) {
 						$selected = true;
 					}
+
+                    if ( $this->checkValueInArray($methodKey, $value, $disabledValues)) {
+                        $disabled = 'disabled="disabled"';
+                    }
 				}
 
-				$optionsResult .= FormObjects::option(($isObject ? $optionDataKey : FormTranslations::t('form', $optionDataKey)), $value, $selected);
+				$optionsResult .= FormObjects::option(($isObject ? $optionDataKey : FormTranslations::t('form', $optionDataKey)), $value, $selected, $disabled);
 			}
 		}
 
@@ -811,18 +835,59 @@ class FormBuilder implements IFormBuilder {
 	}
 
 	/**
+	 * @param $buttonName
+	 * @param $newLabelText
+	 */
+	public function changeButtonLabel($buttonName, $newLabelText) {
+
+		foreach($this->MODELS AS &$model) {
+			foreach($model['options']['buttons'] AS $key => &$button) {
+				if ( strpos($buttonName, "_$key") !== false) {
+					$button['keyword'] = $newLabelText;
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param $buttonName
+	 */
+	public function unsetButton($buttonName) {
+		foreach($this->MODELS AS &$model) {
+			foreach($model['options']['buttons'] AS $key => &$button) {
+				if ( strpos($buttonName, "_$key") !== false) {
+					unset($model['options']['buttons'][$key]);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param $buttonName
+	 */
+	public function addButton($buttonName, $buttonLabel, $buttonType = 'button', $buttonValue = null) {
+		foreach($this->MODELS AS &$model) {
+			$model['options']['buttons'][$buttonType] = array(
+				'name' => $buttonName,
+				'keyword' => $buttonLabel,
+				'value' => $buttonValue
+			);
+		}
+	}
+
+	/**
 	 * Generate Buttons
 	 * @param $model
 	 * @param ModelFieldsReader $reader
 	 * @return null|string
 	 */
-	private function generateButtons($model, ModelFieldsReader $reader) {
+	private function generateButtons(&$model, ModelFieldsReader $reader) {
 		$buttonObjects = null;
 		if (isset($model['options']['buttons'])) {
 
-			foreach($model['options']['buttons'] as $key => $button) {
+			foreach($model['options']['buttons'] as $key => &$button) {
 				$label = (isset($button['keyword']) ? $button['keyword'] : (isset($button['label']) ? $button['label'] : ''));
-				$name = (isset($button['name']) ? $button['name'] : $reader->getModelTableName());
+				$name = $button['name'] = (empty($button['name']) ? $reader->getModelTableName() : $button['name']);
 
 				if ( $key === 'submit' ) {
 

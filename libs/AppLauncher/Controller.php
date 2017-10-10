@@ -22,18 +22,60 @@ abstract class Controller implements AppControllerInterface {
 	private $langCode = self::DEFAULT_LANG_CODE;
 
 	protected $isSecured = false;
+	protected $forceHTTPSRequest = false;
 
 	private $assignedTemplateVars = array();
 
 	private $errorMessages = array();
-	private $successMessages = array();
 
+	private $successMessages = array();
 	private $breadCrumbs = array();
 	private $addBradCrumbsEnabled = true;
 
 	public function __construct($langCode = self::DEFAULT_LANG_CODE) {
 
 		$this->setLangCode($langCode);
+
+	}
+
+	public function hasForceHTTPSRequest() {
+		return $this->forceHTTPSRequest;
+	}
+
+	public function hasForceHTTPRequest() {
+		return !$this->forceHTTPSRequest;
+	}
+
+
+	public function doRedirectToHTTPS() {
+		if ( $this->isHttpRequest() && $this->forceHTTPSRequest ) {
+			header("Location: {$this->getHttpsUri()}");
+		}
+	}
+
+
+	public function doRedirectToHTTP() {
+		if ( $this->isHttpRequest() && $this->forceHTTPSRequest ) {
+			header("Location: {$this->getHttpUri()}");
+		}
+	}
+
+	public function isHttpRequest() {
+		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? false : true);
+	}
+
+	public function isHttpsOn() {
+		return
+			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+			|| $_SERVER['SERVER_PORT'] == 443;
+	}
+
+	public function getHttpsUri() {
+		return 'https:'.DOMAIN_RESOURCES.$_SERVER['REQUEST_URI'];
+	}
+
+	public function getHttpUri() {
+		return 'http:'.DOMAIN_RESOURCES.$_SERVER['REQUEST_URI'];
 	}
 
 	/**
@@ -183,13 +225,19 @@ abstract class Controller implements AppControllerInterface {
 		return $this->assignedTemplateVars;
 	}
 
-	/**
-	 * Add Error Message
-	 * @param $message
-	 */
-	public function addErrorMessage($message) {
-		$this->errorMessages[] = (is_array($message) ? implode('<br />', $message) : $message);
-		$this->getRequest()->session()->setVar('errors', $this->errorMessages);
+    /**
+     * Add Error Message
+     * @param $message
+     * @param int $hideAfter
+     */
+	public function addErrorMessage($message, $hideAfter = 0) {
+        $message = (is_array($message) ? implode('<br />', $message) : $message);
+        $message = array(
+            'message' => $message,
+            'hide_after' => $hideAfter
+        );
+        $this->errorMessages[] = $message;
+        $this->getRequest()->session()->setVar('errors', $this->errorMessages);
 	}
 
 	/**
@@ -200,13 +248,19 @@ abstract class Controller implements AppControllerInterface {
 		return $this->getRequest()->session()->getVar('errors', $this->errorMessages);
 	}
 
-	/**
-	 * Add Success Message
-	 * @param $message
-	 */
-	public function addSuccessMessage($message) {
-		$this->successMessages[] = (is_array($message) ? implode('<br />', $message) : $message);
-		$this->getRequest()->session()->setVar('successMessage', $this->successMessages);
+    /**
+     * Add Success Message
+     * @param $message
+     * @param int $hideAfter
+     */
+	public function addSuccessMessage($message, $hideAfter = 0) {
+        $message = (is_array($message) ? implode('<br />', $message) : $message);
+        $message = array(
+            'message' => $message,
+            'hide_after' => $hideAfter
+        );
+        $this->successMessages[] = $message;
+        $this->getRequest()->session()->setVar('successMessage', $this->successMessages);
 	}
 
 	/**

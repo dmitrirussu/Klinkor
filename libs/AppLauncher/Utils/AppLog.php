@@ -9,6 +9,10 @@
 namespace AppLauncher\Utils;
 
 interface AppLogInterface {
+	/**
+	 * @param string $scriptLogFileName
+	 * @return AppLogWriterInterface
+	 */
 	public function open($scriptLogFileName = 'global_app_log');
 }
 
@@ -49,10 +53,10 @@ class AppLog implements AppLogInterface, AppLogWriterInterface {
 
 	/**
 	 * @param string $scriptLogFileName
-	 * @return AppLogWriterInterface
+	 * @return $this
 	 */
 	public function open($scriptLogFileName = 'global_app_log') {
-		if ( empty($scriptLogFile) ) {
+		if ( empty($scriptLogFileName) ) {
 			throw new \InvalidArgumentException('Missing Argument');
 		}
 

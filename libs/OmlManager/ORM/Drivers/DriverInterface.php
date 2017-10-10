@@ -19,6 +19,7 @@ interface DriverInterface {
 	public function query($sql, array $preparedStatement);
 	public function fetchAll($object = 'stdClass');
 	public function fetchOne($object = 'stdClass');
+	public function getRowCount();
 
 	/**
 	 * @param $query
@@ -30,4 +31,5 @@ interface DriverInterface {
 
 	public function getDataTypes();
 	public function getConnection();
+	public function hasOpenedTransaction();
 }

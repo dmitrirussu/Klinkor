@@ -8,6 +8,7 @@
 
 namespace OmlManager\ORM\Query\OML;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use OmlManager\ORM\Drivers\DriverTransactionInterface;
 use OmlManager\ORM\OmlORManager;
 use OmlManager\ORM\Models\Reader;
@@ -19,7 +20,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 									OMLQueryManagerDeleteOperation, OMLQueryManagerBatchOperation, DriverTransactionInterface {
 
 	private $model;
-
+	private $alias;
 	public function __construct() {}
 
 	/**
@@ -27,7 +28,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 	 * @return $this|OMLQueryMangerOperationsInterface|OMLQueryManagerDeleteOperation|DriverTransactionInterface
 	 * @throws OMLQueryManagerExceptions
 	 */
-	public function model($model) {
+	public function model($model, $alias = null) {
 
 		if ( !is_object($model) ) {
 
@@ -39,6 +40,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		}
 
 		$this->model = $model;
+		$this->alias = $alias;
 
 		return $this;
 	}
@@ -54,18 +56,17 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
+		$reader = new Reader($this->model);
 
 		if (empty($id)) {
-
-			throw new OMLQueryManagerExceptions('Primary Key value cannot be empty');
+			throw new OMLQueryManagerExceptions("Primary Key value cannot be empty table: {$reader->getModelTableName()}, empty key: {$reader->getModelPrimaryKey()}");
 		}
 
-		$reader = new Reader($this->model);
 
 		$exp = new Expression();
 		$exp->field($reader->getModelPrimaryKey())->equal($id);
 
-		return OmlORManager::dml()->select()->model($this->model)->expression($exp)->fetchOne($fetchAssoc);
+		return OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp)->fetchOne($fetchAssoc);
 	}
 
 	/**
@@ -91,7 +92,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$exp = new Expression();
 		$exp->field($fieldName)->operation($value, $operator);
 
-		$omlManagerRequest = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		$omlManagerRequest = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
 
 		if ( $orderBy ) {
 			$omlManagerRequest->orderBy($orderBy);
@@ -124,7 +125,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$exp = new Expression();
 		$exp->field($fieldName)->operation($value, $operator);
 
-		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
 
 		if ( $orderBy ) {
 			$omeletteManager->orderBy($orderBy);
@@ -152,11 +153,28 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
-		$omlMangerRequest = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		$omlMangerRequest = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
 		if ( $orderBy ) {
 			$omlMangerRequest->orderBy($orderBy);
 		}
 		return $omlMangerRequest->fetchOne($fetchAssoc);
+	}
+
+	/**
+	 * @param ExpressionInterface $exp
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
+	 * @return mixed
+	 */
+	public function getRowCountBy(ExpressionInterface $exp) {
+
+		if ( empty($this->model) ) {
+
+			throw new OMLQueryManagerExceptions('Model Cannot be empty');
+		}
+		$omlMangerRequest = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
+
+		return $omlMangerRequest->getRowCount();
 	}
 
 	/**
@@ -172,7 +190,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
 
 		if ( $orderBy ) {
 			$omeletteManager->orderBy($orderBy);
@@ -202,7 +220,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression($exp);
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression($exp);
 
 		if ( $orderBy ) {
 			$omeletteManager->orderBy($orderBy);
@@ -232,7 +250,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		$omeletteManager = OmlORManager::dml()->select()->model($this->model)->expression(new Expression('1=1'));
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression(new Expression('1=1'));
 
 		if ( $orderBy ) {
 			$omeletteManager->orderBy($orderBy);
@@ -246,6 +264,24 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		}
 
 		return $omeletteManager->fetchAll($fetchAssoc);
+	}
+
+	/**
+	 * @param array $limit
+	 * @param array $orderBy
+	 * @throws Exceptions\OMLQueryManagerExceptions
+	 * @return mixed
+	 */
+	public function getRowCount() {
+
+		if ( empty($this->model) ) {
+
+			throw new OMLQueryManagerExceptions('Model Cannot be empty');
+		}
+
+		$omeletteManager = OmlORManager::dml()->select()->model($this->model, $this->alias)->expression(new Expression('1=1'));
+
+		return $omeletteManager->getRowCount();
 	}
 
 	/**
@@ -274,7 +310,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		return OmlORManager::dml()->delete()->model($this->model)->flush();
+		return OmlORManager::dml()->delete()->model($this->model, $this->alias)->flush();
 	}
 
 	/**
@@ -289,7 +325,7 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 			throw new OMLQueryManagerExceptions('Model Cannot be empty');
 		}
 
-		return OmlORManager::dml()->delete()->model($this->model)->expression($exp)->flush();
+		return OmlORManager::dml()->delete()->model($this->model, $this->alias)->expression($exp)->flush();
 	}
 
 	/**
@@ -309,8 +345,53 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		$exp = new Expression();
 		$exp->field($fieldName)->operation($value, $operator);
 
-		return OmlORManager::dml()->delete()->model($this->model)->expression($exp)->flush();
+		return OmlORManager::dml()->delete()->model($this->model, $this->alias)->expression($exp)->flush();
 	}
+
+
+	/**
+	 * @param Expression $exp
+	 * @param array $updateFields
+	 *
+	 * @return mixed
+	 */
+	public function updateBy(Expression $exp, array $updateFields) {
+
+		if ( empty($exp) ) {
+			throw new InvalidArgumentException('Missing Expression');
+		}
+
+		if ( empty($updateFields) ) {
+			throw new InvalidArgumentException('Missing updateFields');
+		}
+
+		return OmlORManager::dml()->update()->model($this->model, $this->alias)->setFieldsAffect($updateFields)->expression($exp)->flush();
+	}
+
+
+	/**
+	 * @param $fieldName
+	 * @param $value
+	 * @param array $updateFields
+	 *
+	 * @return mixed
+	 */
+	public function updateByField($fieldName, $value, array $updateFields) {
+
+		if ( empty($fieldName) ) {
+			throw new InvalidArgumentException('Missing fieldName');
+		}
+
+		if ( empty($updateFields) ) {
+			throw new InvalidArgumentException('Missing updateFields');
+		}
+
+		$exp = new Expression();
+		$exp->field($fieldName)->equal($value);
+
+		return OmlORManager::dml()->update()->model($this->model, $this->alias)->setFieldsAffect($updateFields)->expression($exp)->flush();
+	}
+
 
 	/**
 	 * @throws OMLQueryManagerExceptions
@@ -328,11 +409,11 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 		//insert new Model
 		if ( !$modelReader->getModelPrimaryKeyValue() && !$forceInsert) {
 
-			return OmlORManager::dml()->insert()->model($this->model)->flush();
+			return OmlORManager::dml()->insert()->model($this->model, $this->alias)->flush();
 		}
 
 		//update Model
-		return OmlORManager::dml()->update()->model($this->model)->flush();
+		return OmlORManager::dml()->update()->model($this->model, $this->alias)->flush();
 	}
 
 	public function flushBatch(array $models) {
@@ -351,11 +432,11 @@ class OMLQueryManager implements OMLQueryManagerInterface, OMLQueryMangerOperati
 
 				if ( !$modelReader->getModelPrimaryKeyValue() ) {
 
-					$result = OmlORManager::dml()->insert()->model($model)->flush();
+					$result = OmlORManager::dml()->insert()->model($model, $this->alias)->flush();
 				}
 				else {
 					//update Model
-					$result = OmlORManager::dml()->update()->model($model)->flush();
+					$result = OmlORManager::dml()->update()->model($model, $this->alias)->flush();
 				}
 
 				if ( empty($result) ) {

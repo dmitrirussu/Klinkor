@@ -14,6 +14,7 @@ interface ClauseSelectInterface {
 	public function fetchAssocOne();
 	public function fetchAll();
 	public function fetchAssocAll();
+	public function getRowCount();
 
 	/**
 	 * @param $joinPrimaryForeignKey

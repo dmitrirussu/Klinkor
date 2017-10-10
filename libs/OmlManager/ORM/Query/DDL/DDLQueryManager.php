@@ -49,7 +49,7 @@ class DDLQueryManager implements ClauseInterface {
 			$packageReader = new PackageReader($modelPackage);
 		}
 
-		return SDBManagerConnections::getManager($packageReader->getModelDataDriverConfName())->getDriver();
+		return SDBManagerConnections::getManager($packageReader->getModelDataDriverConfName(), 1, 'DDL')->getDriver();
 	}
 }
 

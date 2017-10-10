@@ -11,6 +11,7 @@ namespace OmlManager\ORM\Query\DML\Clauses;
 use OmlManager\ORM\Models\Reader;
 use OmlManager\ORM\Query\Expression\Expression;
 use OmlManager\ORM\Query\Expression\ExpressionInterface;
+use OmlManager\ORM\Query\Types\ValueTypeValidator;
 use OmlManager\ORM\SDB\SDBManagerConnections;
 
 class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
@@ -24,6 +25,8 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 
 	private $models = array();
 	private $modelsReader = array();
+	private $fieldsValuesAffect = array();
+
 
 	/**
 	 * @var Expression
@@ -50,6 +53,20 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 		return $this;
 	}
 
+
+
+	public function setFieldsAffect(array $fieldsValue) {
+		$this->fieldsValuesAffect = $fieldsValue;
+
+		return $this;
+	}
+
+
+	public function getFieldsAffect() {
+		return $this->fieldsValuesAffect;
+	}
+
+
 	public function expression(ExpressionInterface $exp) {
 		$this->expressionObject = $exp;
 		$this->expressionObject->checkValuesTypeByModels($this->modelsReader);
@@ -58,6 +75,7 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 
 		return $this;
 	}
+
 
 	public function flush() {
 
@@ -76,7 +94,7 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 				$statements = array();
 				$expressionObject = $this->expressionObject;
 
-				if ( $fields ) {
+				if ( $fields && !$this->getFieldsAffect()) {
 					foreach($fields AS $field) {
 						if ( !isset($field['primary_key']) || empty($expressionObject)) {
 
@@ -89,6 +107,30 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 						}
 					}
 				}
+				else {
+					foreach ($modelReader->getModelPropertiesTokens() AS $modelField) {
+						foreach($this->getFieldsAffect() AS $field => $value) {
+							if ( strpos($field, $modelField['field']) === false) {
+								continue;
+							}
+
+							$fieldCheck = ltrim(str_replace($modelField['field'], '', $field), '_');
+							$catToInt = (int)$fieldCheck;
+
+							if ( $fieldCheck !== '' && $catToInt === 0) {
+								continue;
+							}
+
+							$type = $modelField['type'];
+							$valueType = new ValueTypeValidator($value, $type, $modelField['field']);
+
+							$fieldMacros = ':affect_'.$field;
+							$statements[$fieldMacros] =  array('value' => $valueType->getValue(), 'type' => $valueType->getPDOFieldType());
+							$fieldValues[] = "`{$field}`" . '= :affect_'.$field;
+						}
+					}
+				}
+
 
 				if ( $this->expressionObject ) {
 					$statements = array_merge($statements, $this->expressionObject->getPreparedStatement());
@@ -101,14 +143,7 @@ class UpdateClause implements DMLClauseInterface, DMLUpdateClauseInterface {
 						array($tableName, implode(', ', array_filter($fieldValues)), $modelReader->getModelPrimaryKey().'= :'.$modelReader->getModelPrimaryKey()), $this->_UPDATE);
 				}
 
-//				var_dump($this->_UPDATE);
-//				echo '<pre>';
-//				print_r($statements);
-//				echo '</pre>';
-//
-//				die;
-
-				$result = SDBManagerConnections::getManager($modelReader->getModelDataDriverConfName())->getDriver()->execute($this->_UPDATE, $statements);
+				$result = SDBManagerConnections::getManager($modelReader->getModelDataDriverConfName(), 1)->getDriver()->execute($this->_UPDATE, $statements);
 
 				if ( empty($result) ) {
 

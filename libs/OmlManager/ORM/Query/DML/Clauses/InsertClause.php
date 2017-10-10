@@ -93,8 +93,7 @@ class InsertClause implements DMLClauseInterface {
 			$this->_INSERT = str_replace(array(self::TABLE_NAME, self::FIELDS, self::FIELDS_VALUES),
 				array($dataBaseName.'.'.$tableName, implode(', ', array_filter($fields)), implode(', ', $sqlStatement)), $this->_INSERT);
 
-			$result = SDBManagerConnections::getManager($dataBaseConfName)
-				->getDriver()->execute($this->_INSERT, $statements);
+			$result = SDBManagerConnections::getManager($dataBaseConfName, 1)->getDriver()->execute($this->_INSERT, $statements);
 
 			if ( empty($result) ) {
 
@@ -102,7 +101,7 @@ class InsertClause implements DMLClauseInterface {
 			}
 			else{
 				//Set Last Inserted ID
-				$data = SDBManagerConnections::getManager($dataBaseConfName)
+				$data = SDBManagerConnections::getManager($dataBaseConfName, 1)
 					->getDriver()->execute('SELECT LAST_INSERT_ID()', $statements);
 
 				$id = $data->fetch(\PDO::FETCH_NUM);

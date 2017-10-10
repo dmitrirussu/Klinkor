@@ -15,7 +15,7 @@ class Cookies {
 
 	}
 
-	public function setVar($name, $value, $lifeTime, $domain = null) {
+	public function setVar($name, $value, $lifeTime = null, $domain = null) {
 		if ( empty($name) ) {
 			throw new \InvalidArgumentException('Missing var name of cookie');
 		}
@@ -30,12 +30,14 @@ class Cookies {
 		return (isset($_COOKIE[$name]) ? $_COOKIE[$name] : $default);
 	}
 
-	public function unsetVat($name, $domain = null){
-		$domain = ($domain ? $domain : $_SERVER['HTTP_HOST']);
+	public function unsetVar($name, $domain = null){
+		$domain = ($domain === '/' ? ($domain === '/' ? null : $domain) : $_SERVER['HTTP_HOST']);
 
 		if(isset($_COOKIE[$name])) {
+
 			setcookie($name, '', time()-3600);
 			setcookie($name, '', time()-3600, '/', $domain);
+			setcookie($name, '');
 
 			if ( isset($_COOKIE[$name]) ) {
 				unset($_COOKIE[$name]);

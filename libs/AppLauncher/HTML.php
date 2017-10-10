@@ -12,12 +12,13 @@ namespace AppLauncher;
 class HTML {
 	const TPL_EXT = '.tpl.php';
 
-	private static $APP_NAMES = array();
+	private static $CHILD_APP_NAMES = array();
 	private static $INSTANCE;
 
-	private static $IS_PROJECT_APP = false;
-	private static $APP_NAME;
-	private static $APP_PAGE_NAME;
+	private static $IS_MAIN_PROJECT_APP = false;
+	private static $MAIN_APP_NAME;
+	private static $ACTION_VIEW_DIRECTORY;
+	private static $REGISTER_APP;
 
 	private function __construct(){}
 	private function __clone(){}
@@ -31,25 +32,75 @@ class HTML {
 		return self::$INSTANCE;
 	}
 
+
+	public function setRegisterApp(RegisterApp $registerApp) {
+		self::$REGISTER_APP = $registerApp;
+
+		return $this;
+	}
+
+
+	/**
+	 * @return RegisterApp
+	 */
+	public static function getRegisterApp() {
+		return self::$REGISTER_APP;
+	}
+
+
+	/**
+	 * Set Is Project Application Package
+	 * @param $isProjectApp
+	 * @deprecated
+	 * @return $this
+	 */
+	public function setIsProjectApp($isProjectApp) {
+
+		$this->setIsMainProjectApp($isProjectApp);
+
+		return $this;
+	}
 	/**
 	 * Set Is Project Application Package
 	 * @param $isProjectApp
 	 * @return $this
 	 */
-	public function setIsProjectApp($isProjectApp) {
+	public function setIsMainProjectApp($isProjectApp) {
 
-		self::$IS_PROJECT_APP = $isProjectApp;
+		self::$IS_MAIN_PROJECT_APP = $isProjectApp;
 
 		return $this;
 	}
 
 	/**
 	 * get Is Project Application Package
+	 * @deprecated
 	 * @return bool
 	 */
 	public static function getIsProjectApp() {
 
-		return self::$IS_PROJECT_APP;
+		return self::getIsMainProjectApp();
+	}
+
+	/**
+	 * get Is Project Application Package
+	 * @return bool
+	 */
+	public static function getIsMainProjectApp() {
+
+		return self::$IS_MAIN_PROJECT_APP;
+	}
+
+	/**
+	 * Set Included Application Package Name
+	 * @param $appName
+	 * @deprecated
+	 * @return $this
+	 */
+	public function setAppName($appName) {
+		$this->setMainAppName($appName);
+
+		return $this;
 	}
 
 	/**
@@ -57,19 +108,29 @@ class HTML {
 	 * @param $appName
 	 * @return $this
 	 */
-	public function setAppName($appName) {
-		self::$APP_NAME = $appName;
+	public function setMainAppName($appName) {
+		self::$MAIN_APP_NAME[] = $appName;
 
 		return $this;
 	}
 
 	/**
 	 * Get included Application Package Name
+	 * @deprecated
 	 * @return mixed
 	 */
 	public static function getAppName() {
 
-		return self::$APP_NAME;
+		return self::getMainAppName();
+	}
+
+	/**
+	 * Get included Application Package Name
+	 * @return mixed
+	 */
+	public static function getMainAppName() {
+
+		return self::$MAIN_APP_NAME;
 	}
 
 	/**
@@ -77,19 +138,20 @@ class HTML {
 	 * @param $actionName
 	 * @return $this
 	 */
-	public function setAppPageName($actionName) {
-		self::$APP_PAGE_NAME = $actionName;
+	public function setActionViewDirectory($actionName) {
+		self::$ACTION_VIEW_DIRECTORY = $actionName;
 
 		return $this;
 	}
+
 
 	/**
 	 * Get App Action Name
 	 * @return mixed
 	 */
-	public static function getAppPageName() {
+	public static function getActionViewDirectory() {
 
-		return self::$APP_PAGE_NAME;
+		return self::$ACTION_VIEW_DIRECTORY;
 	}
 
 	/**
@@ -98,21 +160,32 @@ class HTML {
 	 * @param $appName
 	 * @return $this
 	 */
-	public function addApp($appName) {
+	public function addChildApp($appName) {
 
-		self::$APP_NAMES[] = $appName;
+		self::$CHILD_APP_NAMES[] = $appName;
 
 		return $this;
 	}
 
 	/**
 	 * Get Project Extended Application
-	 *
+	 * @deprecated
 	 * @return array
 	 */
 	public function getApps() {
 
-		return self::$APP_NAMES;
+		return $this->getChildApps();
+	}
+
+
+	/**
+	 * Get Project Extended Application
+	 *
+	 * @return array
+	 */
+	public static function getChildApps() {
+
+		return self::$CHILD_APP_NAMES;
 	}
 
 	/**
@@ -131,74 +204,25 @@ class HTML {
 				$$key = $value;
 			}
 		}
+
 		ob_start();
+		$templateDirectory = ($isMain ? '' : self::getActionViewDirectory().DIRECTORY_SEPARATOR);
 
-		$templateDirectory = ($isMain ? '' : self::getAppPageName().DIRECTORY_SEPARATOR);
-
-		if ( self::getIsProjectApp() ) {
-
-			$templateFile = PATH_APP.self::getAppName().'/Views/'. $templateDirectory.$tplName.self::TPL_EXT;
-			$templateLibsFile = PATH_LIBS.self::getAppName().'/Views/'. $templateDirectory.$tplName.self::TPL_EXT;
-			$templateInMainDirectory = PATH_APP.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
-			$templateInMainLibsDirectory = PATH_LIBS.self::getAppName().'/Views/'.$tplName.self::TPL_EXT;
+		foreach(self::getRegisterApp()->getCurrentRunningAppPrentApps() AS $app) {
+			$templateFile = PATH_APP.$app['app'].'/Views/'.$templateDirectory.$tplName.self::TPL_EXT;
+			$templateInMainDirectory = PATH_APP.$app['app'].'/Views/'.$tplName.self::TPL_EXT;
 
 			if ( file_exists($templateFile) ) {
 				$tplNotFound = true;
 
 				require $templateFile;
+				break;
 			}
 			elseif(file_exists($templateInMainDirectory)) {
 				$tplNotFound = true;
 
 				require $templateInMainDirectory;
-			}
-			elseif(file_exists($templateInMainLibsDirectory)) {
-				$tplNotFound = true;
-
-				require $templateInMainLibsDirectory;
-			}
-			elseif ( file_exists($templateLibsFile) ) {
-				$tplNotFound = true;
-
-				require $templateLibsFile;
-			}
-
-		}
-		else {
-
-			if ( self::$APP_NAMES ) {
-
-				foreach(self::$APP_NAMES AS $appName) {
-					$templateFile = PATH_APP.$appName.'/Views/'.$templateDirectory.$tplName.self::TPL_EXT;
-					$templateLibsFile = PATH_LIBS.$appName.'/Views/'.$templateDirectory.$tplName.self::TPL_EXT;
-					$templateInMainDirectory = PATH_APP.$appName.'/Views/'.$tplName.self::TPL_EXT;
-					$templateInMainLibsDirectory = PATH_LIBS.$appName.'/Views/'.$tplName.self::TPL_EXT;
-
-					if ( file_exists($templateFile) ) {
-						$tplNotFound = true;
-
-						require $templateFile;
-						break;
-					}
-					elseif(file_exists($templateInMainDirectory)) {
-						$tplNotFound = true;
-
-						require $templateInMainDirectory;
-						break;
-					}
-					elseif(file_exists($templateInMainLibsDirectory)) {
-						$tplNotFound = true;
-
-						require $templateInMainLibsDirectory;
-						break;
-					}
-					elseif ( file_exists($templateLibsFile) ) {
-						$tplNotFound = true;
-
-						require $templateLibsFile;
-						break;
-					}
-				}
+				break;
 			}
 		}
 

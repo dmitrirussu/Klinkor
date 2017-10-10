@@ -15,6 +15,9 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	const DRIVER_MSSQL = 'mssql';
 	const DRIVER_ORACLE = 'oci';
 
+	private static $HAS_OPENED_TRANSACTION = 0;
+	private $debug = false;
+
 	/**
 	 * @var DriversConfig
 	 */
@@ -58,6 +61,10 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	}
 
 	public function connect() {
+		if ( !empty($this->driver) ) {
+			return $this->driver;
+		}
+
 		$options = array(
 			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
 		);
@@ -68,6 +75,7 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 		$this->config->getDataBasePassword(), $options);
 
 		$this->driver->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		$this->driver->setAttribute(\PDO::ATTR_PERSISTENT, false);
 	}
 
 	public function getConnection() {
@@ -82,7 +90,7 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 
 	public function fetchAll($object = 'stdClass') {
 		if ($object === \PDO::FETCH_ASSOC) {
-			return $this->queryResult->fetchAll(\PDO::FETCH_CLASS);
+			return $this->queryResult->fetchAll(\PDO::FETCH_ASSOC);
 		}
 
 		return (empty($this->queryResult) ? false :$this->queryResult->fetchAll(\PDO::FETCH_CLASS, $object));
@@ -90,10 +98,17 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 
 	public function fetchOne($object = 'stdClass') {
 		if ($object === \PDO::FETCH_ASSOC) {
-			return $this->queryResult->fetch(\PDO::FETCH_CLASS);
+			return $this->queryResult->fetch(\PDO::FETCH_ASSOC);
 		}
 
 		return (empty($this->queryResult) ? false : $this->queryResult->fetchObject($object));
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getRowCount() {
+		return $this->queryResult->rowCount();
 	}
 
 	/**
@@ -102,46 +117,88 @@ class PDODriver implements DriverInterface, DriverTransactionInterface {
 	 * @return \PDOStatement
 	 */
 	public function execute($query, array $prepare) {
+
+		if ( $this->debug ) {
+			$f = fopen(PATH_PRIVATE.'/sql_debug.txt', 'a');
+
+			fwrite($f, print_r(array(
+				$query, $prepare
+			), true));
+			fclose($f);
+		}
+
 		$this->queryResult = $this->driver->prepare( $query );
-		$this->queryResult->execute( $prepare );
+		$isNativeQuery = false;
+		if ( $prepare ) {
+			foreach($prepare AS $key => $value) {
+				if ( !isset($value['type']) ) {
+					$isNativeQuery = true;
+					break;
+				}
+				$this->queryResult->bindParam($key, $value['value'], $value['type']);
+			}
+		}
+
+		$this->queryResult->execute(($isNativeQuery ? $prepare : null));
 
 		return $this->queryResult;
 	}
 
-	public function fetchFields() {
-
-	}
+	public function fetchFields() {}
 
 	public function getDataTypes() {
 
 		return self::$_DATA_TYPES;
 	}
 
+
+
 	public function beginTransaction() {
 
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, false);
 
-		return $this->driver->beginTransaction();
+		$result = $this->driver->beginTransaction();
+
+		self::$HAS_OPENED_TRANSACTION = 1;
+
+		return $result;
 	}
+
+
 
 	public function commitTransaction() {
 		$result = $this->driver->commit();
 
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
 
+		self::$HAS_OPENED_TRANSACTION = 0;
+
 		return $result;
 	}
+
+
 
 	public function rollbackTransaction() {
 		$result = $this->driver->rollBack();
 
 		$this->driver->setAttribute(\PDO::ATTR_AUTOCOMMIT, true);
 
+		self::$HAS_OPENED_TRANSACTION = 0;
+
 		return $result;
 	}
 
-	public function __destruct() {
 
+
+	/**
+	 * @return int
+	 */
+	public function hasOpenedTransaction() {
+		return self::$HAS_OPENED_TRANSACTION;
+	}
+
+	public function __destruct() {
+		$this->driver = null;
 		unset($this->driver);
 	}
 } 

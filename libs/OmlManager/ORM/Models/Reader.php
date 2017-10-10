@@ -305,7 +305,7 @@ class Reader implements ReaderInterface {
 			if ( $reflector->hasProperty($fieldName)) {
 				$reflectorProperty = $reflector->getProperty($fieldName);
 				$reflectorProperty->setAccessible(true);
-				$reflectorProperty->setValue($this->model, trim($value));
+				$reflectorProperty->setValue($this->model, (is_string($value) ? trim($value) : $value ));
 			}
 		}
 

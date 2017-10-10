@@ -14,6 +14,7 @@ class CastingValue {
 	private $type;
 
 	const TYPE_INT = 'int';
+	const TYPE_FLOAT = 'float';
 	const TYPE_STRING = 'string';
 	const TYPE_CHAR = 'char';
 	const TYPE_STR = 'str';
@@ -32,6 +33,12 @@ class CastingValue {
 			case self::TYPE_INT: {
 
 				$this->value = (int)$this->value;
+
+				break;
+			}
+			case self::TYPE_FLOAT: {
+
+				$this->value = (float)$this->value;
 
 				break;
 			}

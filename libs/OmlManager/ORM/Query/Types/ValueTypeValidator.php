@@ -24,6 +24,8 @@ class ValueTypeValidator implements ValueTypeInterface {
 		ValueTypes::VALUE_TYPE_TEXT,
 	);
 
+	private $pdoType = 2;
+
 	public function __construct($value, $type, $fieldName = null) {
 		$this->value = $value;
 		$this->type = (is_null($value) && !in_array($type, self::$_VALUE_TYPES_STRINGS) ? ValueTypes::VALUE_TYPE_NULL : $type);
@@ -40,6 +42,16 @@ class ValueTypeValidator implements ValueTypeInterface {
 	public function setType($type = 'char') {
 
 		$this->type = $type;
+
+		return $this;
+	}
+
+	public function getPDOFieldType() {
+		return $this->pdoType;
+	}
+
+	public function setPDOFieldType($type) {
+		$this->pdoType = $type;
 
 		return $this;
 	}
@@ -62,6 +74,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 					}
 
 					$this->value = (int)$this->value;
+					$this->setPDOFieldType(\PDO::PARAM_INT);
 
 					break;
 				}
@@ -77,6 +90,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 					}
 
 					$this->value = (is_null($this->value) ? null : (int)$this->value);
+					$this->setPDOFieldType(\PDO::PARAM_INT);
 
 					break;
 				}
@@ -84,13 +98,14 @@ class ValueTypeValidator implements ValueTypeInterface {
 				case ValueTypes::VALUE_TYPE_DOUBLE:
 				case ValueTypes::VALUE_TYPE_REAL:
 				case ValueTypes::VALUE_TYPE_FLOAT: {
+					$isLike = ($this->value[0] === '%' && $this->value[strlen($this->value)-1] === '%');
 
-					if ( !is_float($this->value) && !is_null($this->value) ) {
-
+					if ( !is_float($this->value) && !is_null($this->value) && !$isLike) {
 						throw new ValueTypeException('Wrong field \''. $this->fieldName .'\' value type, should be float');
 					}
 
-					$this->value = (is_null($this->value) ? $this->value : (float)$this->value);
+					$this->value = (is_null($this->value) ? $this->value : ($isLike ? $this->value : (float)$this->value));
+					$this->setPDOFieldType(\PDO::PARAM_STR);
 
 					break;
 				}
@@ -101,6 +116,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 					}
 
 					$this->value = null;
+					$this->setPDOFieldType(\PDO::PARAM_NULL);
 
 					break;
 				}
@@ -112,6 +128,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 					}
 
 					$this->value = (is_null($this->value) ? $this->value : '');
+					$this->setPDOFieldType(\PDO::PARAM_STR);
 
 					break;
 				}
@@ -135,6 +152,7 @@ class ValueTypeValidator implements ValueTypeInterface {
 					}
 
 					$this->value = (is_null($this->value) ? $this->value : trim($this->value));
+					$this->setPDOFieldType(\PDO::PARAM_STR);
 
 					break;
 				}

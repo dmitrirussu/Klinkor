@@ -19,7 +19,7 @@ interface OMLQueryManagerInterface {
 	 * @param $model
 	 * @return OMLQueryMangerOperationsInterface|OMLQueryManagerDeleteOperation|DriverTransactionInterface
 	 */
-	public function model($model);
+	public function model($model, $alias = null);
 }
 
 interface OMLQueryMangerOperationsInterface {
@@ -30,6 +30,10 @@ interface OMLQueryMangerOperationsInterface {
 	public function fetchAllBy(ExpressionInterface $exp, array $limit = array(), array $orderBy = array(), $fetchAssoc = false);
 	public function fetchOneBy(ExpressionInterface $exp, array $orderBy = array(), $fetchAssoc = false);
 	public function fetch(array $limit = array(), array $orderBy = array(), $fetchAssoc = false);
+	public function getRowCountBy(ExpressionInterface $exp);
+	public function getRowCount();
+	public function updateBy(Expression $exp, array $updateFields);
+	public function updateByField($fieldName, $value, array $updateFields);
 	public function flush();
 }
 

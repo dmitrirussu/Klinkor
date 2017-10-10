@@ -33,7 +33,7 @@ abstract class Generator {
 	protected $driverName;
 
 	public function __construct($dbConfName, $path = null, $nameSpace = null) {
-		$this->driverConfig = new DriversConfig($dbConfName);
+		$this->driverConfig = DriversConfig::instance($dbConfName);
 
 		$this->dataBaseName = $this->driverConfig->getDataBaseName();
 		$this->schemaName = implode(array_map('ucfirst', explode('_', strtolower($this->dataBaseName))));

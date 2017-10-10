@@ -64,8 +64,6 @@ class Expression extends ExpressionInterface {
 	 * @throws ExpressionException
 	 */
 	public function checkValuesTypeByModels(array $models) {
-		$modelProperties = array();
-
 		if ( empty($models) ) {
 			throw new ExpressionException('Missing DataBase model');
 		}
@@ -82,8 +80,10 @@ class Expression extends ExpressionInterface {
 				$models = $models->getModelPropertiesTokens();
 			}
 
+
 			foreach($models AS $alias => $modelFields) {
 				$fieldMacros = null;
+
 				/**
 				 * @var $modelFields Reader
 				 */
@@ -104,28 +104,28 @@ class Expression extends ExpressionInterface {
 							$fieldCheck = ltrim(str_replace($property['field'], '', $field), '_');
 							$catToInt = (int)$fieldCheck;
 
-							if ( $fieldCheck !== '' && $catToInt === 0) {
-								continue;
+                            if ( $fieldCheck !== '' && $catToInt === 0) {
+                                continue;
 							}
 
 							$type = $property['type'];
-							$value = $this->fieldsValues[$alias][$property['field']];
+							$value = $this->fieldsValues[$alias][$field];
 
 							$valueType = new ValueTypeValidator($value, $type, $property['field']);
 
-							if ( is_array($valueType->getValue()) ) {
+							$value = $valueType->getValue();
 
+							if ( is_array($value) ) {
 								$i = 1;
-								foreach($valueType->getValue() AS $v ) {
+								foreach($value AS $key => $v ) {
 
-									$this->prepareStatement[':'.$alias.$property['field'].'_'.$i] = $v;
+									$this->prepareStatement[$key] = array('value' => $v, 'type' => $valueType->getPDOFieldType());
 
 									$i++;
 								}
 							}
 							else {
-
-								$this->prepareStatement[':'.$alias.$property['field']] = $valueType->getValue();
+								$this->prepareStatement[':'.$alias.$field] =  array('value' => $valueType->getValue(), 'type' => $valueType->getPDOFieldType());
 							}
 						}
 					}
@@ -150,17 +150,18 @@ class Expression extends ExpressionInterface {
 
 						$fieldMacros = ':'.$field;
 						$values = $valueType->getValue();
+
 						if ( is_array($values) ) {
 							$i = 1;
 							foreach($values AS $v) {
 
-								$this->prepareStatement[$fieldMacros.'_'.$i] = $v;
+								$this->prepareStatement[$fieldMacros.'_'.$i] = array('value' => $v, 'type' => $valueType->getPDOFieldType());
 								$i++;
 							}
 						}
 						else {
 
-							$this->prepareStatement[$fieldMacros] = $valueType->getValue();
+							$this->prepareStatement[$fieldMacros] =  array('value' => $valueType->getValue(), 'type' => $valueType->getPDOFieldType());
 						}
 					}
 				}
@@ -270,8 +271,24 @@ class Expression extends ExpressionInterface {
 
 			$this->alias = $fieldArray[0];
 			$this->fieldName = $fieldArray[1];
-			$this->fieldsValues[$this->alias][$this->fieldName] = null;
-		}
+
+            if ( isset($this->fieldsValues[$this->alias]) && array_key_exists($this->fieldName, $this->fieldsValues[$this->alias]) ) {
+                $count = 0;
+                foreach($this->fieldsValues[$this->alias] AS $field => $value) {
+                    if ( strpos($field, $this->fieldName) !== false ) {
+                        $count++;
+                    }
+                }
+                if ( $count ) {
+                    $this->fieldName = $this->fieldName."_{$count}";
+                }
+                $this->fieldsValues[$this->alias][$this->fieldName] = null;
+            }
+            else {
+                $this->fieldsValues[$this->alias][$this->fieldName] = null;
+            }
+
+        }
 		else {
 			if ( array_key_exists($this->fieldName, $this->fieldsValues) ) {
 				$count = 0;

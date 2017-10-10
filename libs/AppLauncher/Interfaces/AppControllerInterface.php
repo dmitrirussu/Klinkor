@@ -31,7 +31,12 @@ interface AppControllerInterface {
 	public function isLogged();
 	public function login($email, $password, $hashedPassword, $remember = false);
 	public function logout();
+	public function hasForceHTTPSRequest();
+	public function hasForceHTTPRequest();
+	public function doRedirectToHTTPS();
+	public function doRedirectToHTTP();
 	public function getLangCode();
+	public function setLangCode($langCode);
 	public function getAssignedVars();
 	public function getAssignedJavaScriptFiles();
 	public function getAssignedCSSFiles();

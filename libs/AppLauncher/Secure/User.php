@@ -61,9 +61,9 @@ class User {
 	 * @param $remember
 	 * @return bool
 	 */
-	public static function login($email, $password, $remember = false) {
+	public static function login($email, $password, $hashedPassword, $remember = false) {
 
-		if ( empty($email) || empty($password) || !Login::verify($password, self::getHashedPassword())) {
+		if ( empty($email) || empty($password) || !Login::verify($password, $hashedPassword)) {
 
 			return false;
 		}

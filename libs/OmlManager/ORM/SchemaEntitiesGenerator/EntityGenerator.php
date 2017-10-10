@@ -83,7 +83,6 @@ class EntityGenerator extends Generator {
 		$namespace = GeneratorConf::$_NAMESPACE . $this->schemaNameSpace . $schemaName . "Package\\Model;\n";
 
 		//namespace use package
-//		$namespace .= GeneratorConf::$_USE . $this->schemaNameSpace . $schemaName ."Package\\{$schemaName};";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\OmlORManager;";
 		$namespace .= GeneratorConf::$_USE . "OmlManager\\ORM\\Drivers\\DriverTransactionInterface;
 ";

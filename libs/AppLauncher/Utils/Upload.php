@@ -49,16 +49,16 @@ class Upload {
 
 			foreach($files as $key => $file) {
 				if ($key === 'tmp_name' && isset($file[0])) {
-					$fileTmpFiles = $file[0];
+					$fileTmpFiles = $file;
 
 					$i = 0;
 					foreach($fileTmpFiles as $idFile => $tmpFile) {
-						if ( empty($files['name'][0][$idFile]) ) {
+						if ( empty($files['name'][$idFile]) ) {
 							continue;
 						}
 
 						$tmpFileName = $tmpFile;
-						$fileName = $files['name'][0][$idFile];
+						$fileName = $files['name'][$idFile];
 						$fileInfo = pathinfo($fileName);
 
 						if ( !isset($fileInfo['extension']) ) {

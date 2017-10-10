@@ -9,6 +9,8 @@
 namespace AppLauncher\Action;
 
 
+use AppLauncher\Utils\MethodUtils;
+
 class Request {
 
 	private static $session;
@@ -31,7 +33,7 @@ class Request {
 
 		if ( !isset($_GET[$name]) || $_GET[$name] === null ) {
 
-			$_GET[$name] = $defaultValue;
+			return $_GET[$name] = $defaultValue;
 		}
 
 		$castingValue = new CastingValue($_GET[$name], $type);
@@ -44,14 +46,56 @@ class Request {
 		return $_GET;
 	}
 
-	public function getAllPostData() {
 
+	/**
+	 * Allow ajax if has HEADER 'X-Requested-With', 'XMLHttpRequest'
+	 * @return bool
+	 */
+	public function isAjax() {
+		if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+			return true;
+		}
+		return false;
+	}
+
+
+	/**
+	 * Allow CRUL or any RESTfull APi request if hsd defined next HEADER 'X-Requested-With-Api', 'apirequest'
+	 * @return bool
+	 */
+	public function isApiRequest() {
+		return true;
+		if(!empty($_SERVER['HTTP_X_REQUESTED_WITH_API']) ) {
+			return true;
+		}
+		return false;
+	}
+
+
+	public function getAllPostData($stripTags = false) {
+		if ( is_array($_POST) && $stripTags) {
+			MethodUtils::strip_tags_array($_POST);
+		}
 		return $_POST;
 	}
 
 	public function getAllRequestData() {
 
 		return $_REQUEST;
+	}
+
+	/**
+	 * Get input Data is recommended to use for REST Frontend Apps using BackBoneJS or AngularJS
+	 * @return mixed|string
+	 */
+	public function getInputData($fetchAssoc = false, $deep = 512, $options = 0) {
+		$inputData = file_get_contents('php://input');
+
+		if ( $inputData = @json_decode($inputData, $fetchAssoc, $deep, $options) ) {
+			return $inputData;
+		}
+
+		return $inputData;
 	}
 
 	/**
@@ -66,13 +110,36 @@ class Request {
 		return $_FILES;
 	}
 
-	public static function post($name, $type = 'null', $defaultValue = null) {
+	public static function post($name, $type = 'null', $defaultValue = null, $stripTags = true) {
 		if ( !isset($_POST[$name]) || $_POST[$name] === null ) {
 
-			$_POST[$name] = $defaultValue;
+			return $_POST[$name] = $defaultValue;
 		}
 
-		$castingValue = new CastingValue($_POST[$name], $type);
+		$postData = $_POST[$name];
+
+		if ( $type == 'array' && is_array($postData) && $stripTags) {
+			MethodUtils::strip_tags_array($postData);
+		}
+
+		$castingValue = new CastingValue($postData, $type);
+
+		return $castingValue->getValue();
+	}
+
+	public static function request($name, $type = 'null', $defaultValue = null, $stripTags = true) {
+		if ( !isset($_REQUEST[$name]) || $_POST[$name] === null ) {
+
+			return $_REQUEST[$name] = $defaultValue;
+		}
+
+		$postData = $_REQUEST[$name];
+
+		if ( $type == 'array' && is_array($postData) && $stripTags) {
+			MethodUtils::strip_tags_array($postData);
+		}
+
+		$castingValue = new CastingValue($postData, $type);
 
 		return $castingValue->getValue();
 	}
@@ -119,9 +186,6 @@ class Request {
 		$hostName = '';
 		if ( $local ) {
 			$hostName = ($https ? 'https://' : 'http://') .$_SERVER['HTTP_HOST'].'/';
-			if ( APP_FOLDER ) {
-				$hostName = $hostName;
-			}
 		}
 
 		header('Location: '. $hostName.ltrim($url, '/'));
