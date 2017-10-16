@@ -93,13 +93,16 @@ class Scripts {
 	 * @return Scripts
 	 */
 	public static function showJs() {
+		$domain = (defined('DOMAIN_FILE_RESOURCES') ? DOMAIN_FILE_RESOURCES : '');
+		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
 		$jsScripts = '';
 		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
 		array_unshift($apps, array('app' => 'global'));
 		$minFileName = '';
 		$minFileExists = 1;
 		$scriptMinify = 0;
-		
+
+
 		if ( $apps ) {
 			$javascriptFiles = self::getScriptsJs();
 
@@ -171,14 +174,16 @@ class Scripts {
 	}
 
 	public static function showCSS() {
+		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
+		$domain = (defined('DOMAIN_FILE_RESOURCES') ? DOMAIN_FILE_RESOURCES : '');
 		$minFileName = '';
 		$minFileExists = 1;
 		$scriptMinify = 0;
 		$cssLinks = '';
 		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
 		array_unshift($apps, array('app' => 'global'));
-		
-		
+
+
 		if ( $apps ) {
 			$cssFiles = self::getCssFiles();
 
