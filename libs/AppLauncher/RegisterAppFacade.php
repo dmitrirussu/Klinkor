@@ -94,9 +94,6 @@ class RegisterAppFacade {
 						.'] does not exist');
 				}
 
-				//setup rooting Languages
-				Routing::instance()->setLangCode(Request::session()->getVar('lang', Request::get('lang', 'char', \MyAccountApp\MyAccountApp::DEFAULT_LANG_CODE)));
-
 				//Run Controller
 				$this->controller = new $this->controller(Routing::instance()->getLangCode());
 
