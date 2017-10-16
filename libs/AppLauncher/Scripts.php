@@ -93,21 +93,13 @@ class Scripts {
 	 * @return Scripts
 	 */
 	public static function showJs() {
-		require_once PATH_LIBS."minify/vendor/autoload.php";
-		$minifyJS = new \MatthiasMullie\Minify\JS();
-		$domain = (APP_CURRENT_FOLDER ? DOMAIN_FILE_RESOURCES : '');
-		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
 		$jsScripts = '';
 		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
 		array_unshift($apps, array('app' => 'global'));
 		$minFileName = '';
 		$minFileExists = 1;
-		try {
-			$scriptMinify = AppSettings::getConstValue('SCRIPTS_MINIFY');
-		}
-		catch (\Exception $e) {
-			$scriptMinify = 0;
-		}
+		$scriptMinify = 0;
+		
 		if ( $apps ) {
 			$javascriptFiles = self::getScriptsJs();
 
@@ -179,22 +171,14 @@ class Scripts {
 	}
 
 	public static function showCSS() {
-		require_once PATH_LIBS."minify/vendor/autoload.php";
-		$minifyCSS = new \MatthiasMullie\Minify\CSS();
-		$acceptGZCompression = strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false;
-		$domain = (APP_CURRENT_FOLDER ? DOMAIN_FILE_RESOURCES : '');
 		$minFileName = '';
 		$minFileExists = 1;
+		$scriptMinify = 0;
 		$cssLinks = '';
 		$apps = array_reverse(RegisterApp::instance()->getCurrentRunningAppPrentApps());
 		array_unshift($apps, array('app' => 'global'));
-		try {
-			$scriptMinify = AppSettings::getConstValue('SCRIPTS_MINIFY');
-		}
-		catch (\Exception $e) {
-			$scriptMinify = 0;
-		}
-
+		
+		
 		if ( $apps ) {
 			$cssFiles = self::getCssFiles();
 
